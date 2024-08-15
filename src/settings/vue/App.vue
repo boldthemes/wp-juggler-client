@@ -8,9 +8,9 @@ const queryClient = useQueryClient()
 
 const store = useWpjcStore()
 
-const nonce = ref(wpjs_settings_object.nonce)
+const nonce = ref(wpjc_settings_object.nonce)
 
-const wpjs_cp_slug = ref('')
+const wpjc_cp_slug = ref('')
 const save_loading = ref(false)
 
 const snackbar = ref(false)
@@ -20,7 +20,7 @@ const snack_succ_text = 'WP Juggler Settings Saved'
 
 
 const { isLoading, isError, isFetching, data, error, refetch } = useQuery({
-  queryKey: ['wpjs-settings'],
+  queryKey: ['wpjc-settings'],
   queryFn: getSettings
 })
 
@@ -28,7 +28,7 @@ const mutation = useMutation({
   mutationFn: saveSettings,
   onSuccess: async () => {
     // Invalidate and refetch
-    queryClient.invalidateQueries({ queryKey: ['wpjs-settings'] })
+    queryClient.invalidateQueries({ queryKey: ['wpjc-settings'] })
     save_loading.value = false
 
     snackbar_color.value = 'success'
@@ -36,7 +36,7 @@ const mutation = useMutation({
     snackbar.value = true
   },
   onError: (error, variables, context) => {
-    queryClient.invalidateQueries({ queryKey: ['wpjs-settings'] })
+    queryClient.invalidateQueries({ queryKey: ['wpjc-settings'] })
     save_loading.value = false
 
     snackbar_color.value = 'error'
@@ -49,7 +49,7 @@ async function doAjax(args) {
   let result;
   try {
     result = await jQuery.ajax({
-      url: wpjs_settings_object.ajaxurl,
+      url: wpjc_settings_object.ajaxurl,
       type: 'POST',
       data: args
     });
@@ -64,12 +64,12 @@ async function getSettings() {
   let ret = {}
   const response = await doAjax(
     {
-      action: "wpjs_get_settings",  // the action to fire in the server
+      action: "wpjc_get_settings",  // the action to fire in the server
     }
   )
   ret = response.data
 
-  wpjs_cp_slug.value = response.data.wpjs_cp_slug
+  wpjc_cp_slug.value = response.data.wpjc_cp_slug
 
   return ret
 }
@@ -77,13 +77,13 @@ async function getSettings() {
 function clickSaveSettings() {
   save_loading.value = true
   mutation.mutate({
-    wpjs_cp_slug: wpjs_cp_slug.value,
+    wpjc_cp_slug: wpjc_cp_slug.value,
   })
 }
 
 async function saveSettings(obj) {
 
-  obj.action = "wpjs_save_settings"
+  obj.action = "wpjc_save_settings"
   obj.nonce = nonce.value
 
   const response = await doAjax(obj)
@@ -103,7 +103,7 @@ async function saveSettings(obj) {
         <tr>
           <th scope="row"><label for="blogname">Page Slug of Control Panel</label></th>
           <td>
-            <input type="text" name="wpjscpslug" id="wpjscpslug" size="50" placeholder="" v-model="wpjs_cp_slug">
+            <input type="text" name="wpjccpslug" id="wpjccpslug" size="50" placeholder="" v-model="wpjc_cp_slug">
           </td>
         </tr>
 

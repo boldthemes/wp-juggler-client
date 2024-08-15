@@ -78,7 +78,6 @@ class WP_Juggler_Client {
 		require_once WPJC_PATH . 'includes/class-wpjc-loader.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-i18n.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-admin.php';
-		require_once WPJC_PATH . 'includes/class-wpjc-front-end.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-ajax.php';
 		
 		$this->loader = new WPJC_Loader();
@@ -110,7 +109,6 @@ class WP_Juggler_Client {
 		// Initialize the admin class.
 		$plugin_admin  = new WPJC_Admin( $this->get_plugin_name(), $this->get_version() );
 		$plugin_ajax  = new WPJC_AJAX( $this->get_plugin_name(), $this->get_version() );
-		$plugin_fe  = new WPJC_Front_End( $this->get_plugin_name(), $this->get_version() );
 		
 		/// Register the admin pages and scripts.
 		
@@ -119,28 +117,11 @@ class WP_Juggler_Client {
 		
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_plugin_assets' );
 		
-		//$this->loader->add_action( 'init', $plugin_admin, 'wpjs_cpt', 5 );
-		//$this->loader->add_action( 'add_meta_boxes_wpjugglersites', $plugin_admin, 'wpjs_sites_metaboxes' );
-		//$this->loader->add_action( 'save_post_wpjugglersites', $plugin_admin, 'wpjs_save_sites_meta_boxes' );
-		
-		//$this->loader->add_filter( 'admin_menu', $plugin_admin, 'cp_hide_admin_menus', 9999 );
+		$this->loader->add_action( 'wp_ajax_wpjc_get_dashboard', $plugin_ajax, 'ajax_get_dashboard' );
 
-		//$this->loader->add_filter( 'manage_wpjugglersites_posts_columns', $plugin_admin, 'wpjs_add_custom_column' );
-		//$this->loader->add_action( 'manage_wpjugglersites_posts_custom_column', $plugin_admin, 'wpjs_display_custom_column', 10, 2);
+		$this->loader->add_action( 'wp_ajax_wpjc_get_settings', $plugin_ajax, 'ajax_get_settings' );
+		$this->loader->add_action( 'wp_ajax_wpjc_save_settings', $plugin_ajax, 'ajax_save_settings' );
 
-		//Ajax actions
-		//$this->loader->add_action( 'wp_ajax_juggler_user_search', $plugin_ajax, 'wpjs_user_search' );
-
-		$this->loader->add_action( 'wp_ajax_wpjs_get_dashboard', $plugin_ajax, 'ajax_get_dashboard' );
-
-		$this->loader->add_action( 'wp_ajax_wpjs_get_settings', $plugin_ajax, 'ajax_get_settings' );
-		$this->loader->add_action( 'wp_ajax_wpjs_save_settings', $plugin_ajax, 'ajax_save_settings' );
-
-		//$this->loader->add_action( 'wp_ajax_wpjs_get_control_panel', $plugin_ajax, 'ajax_get_control_panel' );
-
-		//FE actions
-		//$this->loader->add_action( 'init', $plugin_fe, 'wpjs_empty_template' );
-		//$this->loader->add_filter( 'pre_handle_404', $plugin_admin, 'wpjs_pre_404_filter', 5, 2 );
 
 	}
 

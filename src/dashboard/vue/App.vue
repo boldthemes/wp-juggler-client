@@ -8,12 +8,12 @@ const queryClient = useQueryClient()
 
 const store = useWpjcStore()
 
-const nonce = ref(wpjs_dashboard_object.nonce)
+const nonce = ref(wpjc_dashboard_object.nonce)
 
 const activation_status = ref(false)
 
 const { isLoading, isError, isFetching, data, error, refetch } = useQuery({
-  queryKey: ['wpjs-dashboard'],
+  queryKey: ['wpjc-dashboard'],
   queryFn: getDashboard
 })
 
@@ -21,7 +21,7 @@ async function doAjax(args) {
   let result;
   try {
     result = await jQuery.ajax({
-      url: wpjs_dashboard_object.ajaxurl,
+      url: wpjc_dashboard_object.ajaxurl,
       type: 'POST',
       data: args
     });
@@ -36,7 +36,7 @@ async function getDashboard() {
   let ret = {}
   const response = await doAjax(
     {
-      action: "wpjs_get_dashboard",  // the action to fire in the server
+      action: "wpjc_get_dashboard",  // the action to fire in the client
     }
   )
   ret = response.data
@@ -86,7 +86,7 @@ onMounted(() => {
         </td>
         <td>
           <div>
-            {{ item.wp_juggler_server_site_url }}
+            {{ item.wp_juggler_client_site_url }}
           </div>
         </td>
       </tr>

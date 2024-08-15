@@ -9098,15 +9098,15 @@ exports.default = {
         __expose();
         const queryClient = (0, _vueQuery.useQueryClient)();
         const store = (0, _storeJs.useWpjcStore)();
-        const nonce = (0, _vue.ref)(wpjs_settings_object.nonce);
-        const wpjs_cp_slug = (0, _vue.ref)("");
+        const nonce = (0, _vue.ref)(wpjc_settings_object.nonce);
+        const wpjc_cp_slug = (0, _vue.ref)("");
         const save_loading = (0, _vue.ref)(false);
         const snackbar = (0, _vue.ref)(false);
         const snackbar_color = (0, _vue.ref)("success");
         const snackbar_text = (0, _vue.ref)(snack_succ_text);
         const { isLoading, isError, isFetching, data, error, refetch } = (0, _vueQuery.useQuery)({
             queryKey: [
-                "wpjs-settings"
+                "wpjc-settings"
             ],
             queryFn: getSettings
         });
@@ -9116,7 +9116,7 @@ exports.default = {
                 // Invalidate and refetch
                 queryClient.invalidateQueries({
                     queryKey: [
-                        "wpjs-settings"
+                        "wpjc-settings"
                     ]
                 });
                 save_loading.value = false;
@@ -9127,7 +9127,7 @@ exports.default = {
             onError: (error, variables, context)=>{
                 queryClient.invalidateQueries({
                     queryKey: [
-                        "wpjs-settings"
+                        "wpjc-settings"
                     ]
                 });
                 save_loading.value = false;
@@ -9140,7 +9140,7 @@ exports.default = {
             let result;
             try {
                 result = await jQuery.ajax({
-                    url: wpjs_settings_object.ajaxurl,
+                    url: wpjc_settings_object.ajaxurl,
                     type: "POST",
                     data: args
                 });
@@ -9152,20 +9152,20 @@ exports.default = {
         async function getSettings() {
             let ret = {};
             const response = await doAjax({
-                action: "wpjs_get_settings"
+                action: "wpjc_get_settings"
             });
             ret = response.data;
-            wpjs_cp_slug.value = response.data.wpjs_cp_slug;
+            wpjc_cp_slug.value = response.data.wpjc_cp_slug;
             return ret;
         }
         function clickSaveSettings() {
             save_loading.value = true;
             mutation.mutate({
-                wpjs_cp_slug: wpjs_cp_slug.value
+                wpjc_cp_slug: wpjc_cp_slug.value
             });
         }
         async function saveSettings(obj) {
-            obj.action = "wpjs_save_settings";
+            obj.action = "wpjc_save_settings";
             obj.nonce = nonce.value;
             const response = await doAjax(obj);
         }
@@ -9173,7 +9173,7 @@ exports.default = {
             queryClient,
             store,
             nonce,
-            wpjs_cp_slug,
+            wpjc_cp_slug,
             save_loading,
             snackbar,
             snackbar_color,
@@ -14681,15 +14681,15 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                                 (0, _vue.createElementVNode)("td", null, [
                                     (0, _vue.withDirectives)((0, _vue.createElementVNode)("input", {
                                         type: "text",
-                                        name: "wpjscpslug",
-                                        id: "wpjscpslug",
+                                        name: "wpjccpslug",
+                                        id: "wpjccpslug",
                                         size: "50",
                                         placeholder: "",
-                                        "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event)=>$setup.wpjs_cp_slug = $event)
+                                        "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event)=>$setup.wpjc_cp_slug = $event)
                                     }, null, 512 /* NEED_PATCH */ ), [
                                         [
                                             (0, _vue.vModelText),
-                                            $setup.wpjs_cp_slug
+                                            $setup.wpjc_cp_slug
                                         ]
                                     ])
                                 ])

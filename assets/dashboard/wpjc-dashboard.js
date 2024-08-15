@@ -9098,11 +9098,11 @@ exports.default = {
         __expose();
         const queryClient = (0, _vueQuery.useQueryClient)();
         const store = (0, _storeJs.useWpjcStore)();
-        const nonce = (0, _vue.ref)(wpjs_dashboard_object.nonce);
+        const nonce = (0, _vue.ref)(wpjc_dashboard_object.nonce);
         const activation_status = (0, _vue.ref)(false);
         const { isLoading, isError, isFetching, data, error, refetch } = (0, _vueQuery.useQuery)({
             queryKey: [
-                "wpjs-dashboard"
+                "wpjc-dashboard"
             ],
             queryFn: getDashboard
         });
@@ -9110,7 +9110,7 @@ exports.default = {
             let result;
             try {
                 result = await jQuery.ajax({
-                    url: wpjs_dashboard_object.ajaxurl,
+                    url: wpjc_dashboard_object.ajaxurl,
                     type: "POST",
                     data: args
                 });
@@ -9122,7 +9122,7 @@ exports.default = {
         async function getDashboard() {
             let ret = {};
             const response = await doAjax({
-                action: "wpjs_get_dashboard"
+                action: "wpjc_get_dashboard"
             });
             ret = response.data;
             //api_key.value = response.data.api_key
@@ -14690,7 +14690,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                                         (0, _vue.createElementVNode)("div", null, (0, _vue.toDisplayString)(item.title), 1 /* TEXT */ )
                                     ]),
                                     (0, _vue.createElementVNode)("td", null, [
-                                        (0, _vue.createElementVNode)("div", null, (0, _vue.toDisplayString)(item.wp_juggler_server_site_url), 1 /* TEXT */ )
+                                        (0, _vue.createElementVNode)("div", null, (0, _vue.toDisplayString)(item.wp_juggler_client_site_url), 1 /* TEXT */ )
                                     ])
                                 ]);
                             }), 256 /* UNKEYED_FRAGMENT */ )),
