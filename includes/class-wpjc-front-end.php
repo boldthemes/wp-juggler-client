@@ -9,14 +9,14 @@
  * @link       https://wpjuggler.com
  * @since      1.0.0
  *
- * @package    WP_Juggler_Server
- * @subpackage WP_Juggler_Server/includes
+ * @package    WP_Juggler_Client
+ * @subpackage WP_Juggler_Client/includes
  */
 
 // Prevent direct access.
-if (! defined('WPJS_PATH')) exit;
+if (! defined('WPJC_PATH')) exit;
 
-class WPJS_Front_End
+class WPJC_Front_End
 {
 
 	/**
@@ -69,7 +69,7 @@ class WPJS_Front_End
 			}
 
 			add_filter('template_include', function( $template ) {
-				//return WPJS_PATH . 'templates/wpjs-empty-template.php';
+				//return WPJC_PATH . 'templates/wpjs-empty-template.php';
 				return $template;
 			});
 

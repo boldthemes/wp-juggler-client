@@ -6,14 +6,14 @@
  * @link       https://wpjuggler.com
  * @since      1.0.0
  *
- * @package    WP_Juggler_Server
- * @subpackage WP_Juggler_Server/includes
+ * @package    WP_Juggler_Client
+ * @subpackage WP_Juggler_Client/includes
  */
 
 // Prevent direct access.
-if ( ! defined( 'WPJS_PATH' ) ) exit;
+if ( ! defined( 'WPJC_PATH' ) ) exit;
 
-class WPJS_Compatibility {
+class WPJC_Compatibility {
 
 	/**
 	 * Returns the system info.
@@ -39,8 +39,8 @@ class WPJS_Compatibility {
 
 		// Plugin Configuration
 		$return .= "\n<br>" . '-- Better Search Replace Configuration' . "\n\n<br>";
-		$return .= 'Plugin Version:           ' . WPJS_VERSION . "\n<br>";
-		$db      = new WPJS_DB();
+		$return .= 'Plugin Version:           ' . WPJC_VERSION . "\n<br>";
+		$db      = new WPJC_DB();
 		$return .= 'Max Page Size:            ' . $db->get_page_size() . "\n<br>";
 
 		// Server Configuration

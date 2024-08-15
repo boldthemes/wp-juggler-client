@@ -9,14 +9,14 @@
  * @link       https://wpjuggler.com
  * @since      1.0.0
  *
- * @package    WP_Juggler_Server
- * @subpackage WP_Juggler_Server/includes
+ * @package    WP_Juggler_Client
+ * @subpackage WP_Juggler_Client/includes
  */
 
 // Prevent direct access.
-if (! defined('WPJS_PATH')) exit;
+if (! defined('WPJC_PATH')) exit;
 
-class WPJS_Admin
+class WPJC_Admin
 {
 
 	/**
@@ -158,8 +158,8 @@ class WPJS_Admin
 		$cap = apply_filters('wpjs_capability', 'manage_options');
 
 		add_menu_page(
-			__('WP Juggler', 'wp-juggler-server'),
-			__('WP Juggler', 'wp-juggler-server'),
+			__('WP Juggler', 'wp-juggler-client'),
+			__('WP Juggler', 'wp-juggler-client'),
 			$cap,
 			"wpjs-dashboard",
 			[$this, 'render_admin_page'],
@@ -170,8 +170,8 @@ class WPJS_Admin
 
 		add_submenu_page(
 			'wpjs-dashboard',
-			__('Dashboard', 'wp-juggler-server'),
-			__('Dashboard', 'wp-juggler-server'),
+			__('Dashboard', 'wp-juggler-client'),
+			__('Dashboard', 'wp-juggler-client'),
 			$cap,
 			"wpjs-dashboard"
 		);
@@ -184,8 +184,8 @@ class WPJS_Admin
 
 		add_submenu_page(
 			'wpjs-dashboard',
-			__('Settings', 'wp-juggler-server'),
-			__('Settings', 'wp-juggler-server'),
+			__('Settings', 'wp-juggler-client'),
+			__('Settings', 'wp-juggler-client'),
 			$cap,
 			'wpjs-settings',
 			[$this, 'render_admin_page']
@@ -193,8 +193,8 @@ class WPJS_Admin
 
 		add_submenu_page(
 			'wpjs-dashboard',
-			__('Control Panel', 'wp-juggler-server'),
-			__('Control Panel', 'wp-juggler-server'),
+			__('Control Panel', 'wp-juggler-client'),
+			__('Control Panel', 'wp-juggler-client'),
 			$cap,
 			'wpjs-control-panel',
 			[$this, 'render_admin_page']
@@ -206,23 +206,23 @@ class WPJS_Admin
 	{
 
 		$labels = array(
-			'name'                => __('Sites', 'wp-juggler-server'),
-			'singular_name'       => __('Site',  'wp-juggler-server'),
-			'menu_name'           => __('WP Juggler', 'wp-juggler-server'),
-			'all_items'           => __('Sites', 'wp-juggler-server'),
-			'view_item'           => __('View Site', 'wp-juggler-server'),
-			'add_new_item'        => __('Add New Site', 'wp-juggler-server'),
-			'add_new'             => __('Add New', 'wp-juggler-server'),
-			'edit_item'           => __('Edit Site', 'wp-juggler-server'),
-			'update_item'         => __('Update Site', 'wp-juggler-server'),
-			'search_items'        => __('Search Sites', 'wp-juggler-server'),
-			'not_found'           => __('Not Found', 'wp-juggler-server'),
-			'not_found_in_trash'  => __('Not found in Trash', 'wp-juggler-server'),
+			'name'                => __('Sites', 'wp-juggler-client'),
+			'singular_name'       => __('Site',  'wp-juggler-client'),
+			'menu_name'           => __('WP Juggler', 'wp-juggler-client'),
+			'all_items'           => __('Sites', 'wp-juggler-client'),
+			'view_item'           => __('View Site', 'wp-juggler-client'),
+			'add_new_item'        => __('Add New Site', 'wp-juggler-client'),
+			'add_new'             => __('Add New', 'wp-juggler-client'),
+			'edit_item'           => __('Edit Site', 'wp-juggler-client'),
+			'update_item'         => __('Update Site', 'wp-juggler-client'),
+			'search_items'        => __('Search Sites', 'wp-juggler-client'),
+			'not_found'           => __('Not Found', 'wp-juggler-client'),
+			'not_found_in_trash'  => __('Not found in Trash', 'wp-juggler-client'),
 		);
 
 		$args = array(
-			'label'               => __('sites', 'wp-juggler-server'),
-			'description'         => __('Sites', 'wp-juggler-server'),
+			'label'               => __('sites', 'wp-juggler-client'),
+			'description'         => __('Sites', 'wp-juggler-client'),
 			'labels'              => $labels,
 			'supports'            => array('title'),
 			'hierarchical'        => false,
@@ -259,7 +259,7 @@ class WPJS_Admin
 	{
 		add_meta_box(
 			'wpjs_site_details',
-			__('Site Details', 'wp-juggler-server'),
+			__('Site Details', 'wp-juggler-client'),
 			array($this, 'render_juggler_sites_meta_box'),
 			'wpjugglersites',
 			'normal',
@@ -270,7 +270,7 @@ class WPJS_Admin
 
 		add_meta_box(
 			'submitdiv',
-			__('Save', 'wp-juggler-server'),
+			__('Save', 'wp-juggler-client'),
 			array($this, 'render_juggler_sites_publish_meta_box'),
 			'wpjugglersites',
 			'side',
@@ -279,7 +279,7 @@ class WPJS_Admin
 
 		add_meta_box(
 			'wpjs_users', // ID
-			__('Assign Users', 'wp-juggler-server'), // Title
+			__('Assign Users', 'wp-juggler-client'), // Title
 			array($this, 'render_juggler_users_meta_box'),
 			'wpjugglersites', // Post type
 			'normal', // Context

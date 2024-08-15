@@ -6,12 +6,12 @@
  * @link       https://wpjuggler.com
  * @since      1.0.0
  *
- * @package    WP_Juggler_Server
- * @subpackage WP_Juggler_Server/includes
+ * @package    WP_Juggler_Client
+ * @subpackage WP_Juggler_Client/includes
  */
 
 // Prevent direct access.
-if ( ! defined( 'WPJS_PATH' ) ) exit;
+if ( ! defined( 'WPJC_PATH' ) ) exit;
 
 /**
  * Register all actions and filters for the plugin.
@@ -23,7 +23,7 @@ if ( ! defined( 'WPJS_PATH' ) ) exit;
  * @package    Better_Search_Replace
  * @subpackage Better_Search_Replace/includes
  */
-class WPJS_Loader {
+class WPJC_Loader {
 
 	/**
 	 * The array of actions registered with WordPress.

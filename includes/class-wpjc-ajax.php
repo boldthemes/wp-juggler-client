@@ -6,14 +6,14 @@
  * @link       https://wpjuggler.com
  * @since      1.0.0
  *
- * @package    WP_Juggler_Server
- * @subpackage WP_Juggler_Server/includes
+ * @package    WP_Juggler_Client
+ * @subpackage WP_Juggler_Client/includes
  */
 
 // Prevent direct access.
-if (! defined('WPJS_PATH')) exit;
+if (! defined('WPJC_PATH')) exit;
 
-class WPJS_AJAX
+class WPJC_AJAX
 {
 
 	/**

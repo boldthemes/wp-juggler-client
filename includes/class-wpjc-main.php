@@ -10,14 +10,14 @@
  * version of the plugin.
  *
  * @since      1.0
- * @package    WP_Juggler_Server
- * @subpackage WP_Juggler_Server/includes
+ * @package    WP_Juggler_Client
+ * @subpackage WP_Juggler_Client/includes
  */
 
 // Prevent direct access.
-if ( ! defined( 'WPJS_PATH' ) ) exit;
+if ( ! defined( 'WPJC_PATH' ) ) exit;
 
-class WP_Juggler_Server {
+class WP_Juggler_Client {
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -25,7 +25,7 @@ class WP_Juggler_Server {
 	 *
 	 * @since    1.0
 	 * @access   protected
-	 * @var      WPJS_Loader   $loader   Maintains and registers all hooks for the plugin.
+	 * @var      WPJC_Loader   $loader   Maintains and registers all hooks for the plugin.
 	 */
 	protected $loader;
 
@@ -57,8 +57,8 @@ class WP_Juggler_Server {
 	 * @since    1.0
 	 */
 	public function __construct() {
-		$this->plugin_name 	= 'wp-juggler-server';
-		$this->version 		= WPJS_VERSION;
+		$this->plugin_name 	= 'wp-juggler-client';
+		$this->version 		= WPJC_VERSION;
 		$this->load_dependencies();
 		$this->set_locale();
 		$this->define_admin_hooks();
@@ -75,26 +75,26 @@ class WP_Juggler_Server {
 	 */
 	private function load_dependencies() {
 
-		require_once WPJS_PATH . 'includes/class-wpjs-loader.php';
-		require_once WPJS_PATH . 'includes/class-wpjs-i18n.php';
-		require_once WPJS_PATH . 'includes/class-wpjs-admin.php';
-		require_once WPJS_PATH . 'includes/class-wpjs-front-end.php';
-		require_once WPJS_PATH . 'includes/class-wpjs-ajax.php';
+		require_once WPJC_PATH . 'includes/class-wpjc-loader.php';
+		require_once WPJC_PATH . 'includes/class-wpjc-i18n.php';
+		require_once WPJC_PATH . 'includes/class-wpjc-admin.php';
+		require_once WPJC_PATH . 'includes/class-wpjc-front-end.php';
+		require_once WPJC_PATH . 'includes/class-wpjc-ajax.php';
 		
-		$this->loader = new WPJS_Loader();
+		$this->loader = new WPJC_Loader();
 	}
 
 	/**
 	 * Define the locale for this plugin for internationalization.
 	 *
-	 * Uses the WPJS_i18n class in order to set the domain and to register the hook
+	 * Uses the WPJC_i18n class in order to set the domain and to register the hook
 	 * with WordPress.
 	 *
 	 * @since    1.0
 	 * @access   private
 	 */
 	private function set_locale() {
-		$plugin_i18n = new WPJS_i18n();
+		$plugin_i18n = new WPJC_i18n();
 		$plugin_i18n->set_domain( $this->get_plugin_name() );
 	}
 
@@ -108,9 +108,9 @@ class WP_Juggler_Server {
 	private function define_admin_hooks() {
 
 		// Initialize the admin class.
-		$plugin_admin  = new WPJS_Admin( $this->get_plugin_name(), $this->get_version() );
-		$plugin_ajax  = new WPJS_AJAX( $this->get_plugin_name(), $this->get_version() );
-		$plugin_fe  = new WPJS_Front_End( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin  = new WPJC_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_ajax  = new WPJC_AJAX( $this->get_plugin_name(), $this->get_version() );
+		$plugin_fe  = new WPJC_Front_End( $this->get_plugin_name(), $this->get_version() );
 		
 		/// Register the admin pages and scripts.
 		
@@ -119,25 +119,24 @@ class WP_Juggler_Server {
 		
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_plugin_assets' );
 		
-		$this->loader->add_action( 'init', $plugin_admin, 'wpjs_cpt', 5 );
+		//$this->loader->add_action( 'init', $plugin_admin, 'wpjs_cpt', 5 );
+		//$this->loader->add_action( 'add_meta_boxes_wpjugglersites', $plugin_admin, 'wpjs_sites_metaboxes' );
+		//$this->loader->add_action( 'save_post_wpjugglersites', $plugin_admin, 'wpjs_save_sites_meta_boxes' );
+		
+		//$this->loader->add_filter( 'admin_menu', $plugin_admin, 'cp_hide_admin_menus', 9999 );
 
-		$this->loader->add_action( 'add_meta_boxes_wpjugglersites', $plugin_admin, 'wpjs_sites_metaboxes' );
-		$this->loader->add_action( 'save_post_wpjugglersites', $plugin_admin, 'wpjs_save_sites_meta_boxes' );
-
-		$this->loader->add_filter( 'admin_menu', $plugin_admin, 'cp_hide_admin_menus', 9999 );
-
-		$this->loader->add_filter( 'manage_wpjugglersites_posts_columns', $plugin_admin, 'wpjs_add_custom_column' );
-		$this->loader->add_action( 'manage_wpjugglersites_posts_custom_column', $plugin_admin, 'wpjs_display_custom_column', 10, 2);
+		//$this->loader->add_filter( 'manage_wpjugglersites_posts_columns', $plugin_admin, 'wpjs_add_custom_column' );
+		//$this->loader->add_action( 'manage_wpjugglersites_posts_custom_column', $plugin_admin, 'wpjs_display_custom_column', 10, 2);
 
 		//Ajax actions
-		$this->loader->add_action( 'wp_ajax_juggler_user_search', $plugin_ajax, 'wpjs_user_search' );
+		//$this->loader->add_action( 'wp_ajax_juggler_user_search', $plugin_ajax, 'wpjs_user_search' );
 
 		$this->loader->add_action( 'wp_ajax_wpjs_get_dashboard', $plugin_ajax, 'ajax_get_dashboard' );
 
 		$this->loader->add_action( 'wp_ajax_wpjs_get_settings', $plugin_ajax, 'ajax_get_settings' );
 		$this->loader->add_action( 'wp_ajax_wpjs_save_settings', $plugin_ajax, 'ajax_save_settings' );
 
-		$this->loader->add_action( 'wp_ajax_wpjs_get_control_panel', $plugin_ajax, 'ajax_get_control_panel' );
+		//$this->loader->add_action( 'wp_ajax_wpjs_get_control_panel', $plugin_ajax, 'ajax_get_control_panel' );
 
 		//FE actions
 		//$this->loader->add_action( 'init', $plugin_fe, 'wpjs_empty_template' );
@@ -169,7 +168,7 @@ class WP_Juggler_Server {
 	 * The reference to the class that orchestrates the hooks with the plugin.
 	 *
 	 * @since     1.0
-	 * @return    Better_Search_Replace_Loader    Orchestrates the hooks of the plugin.
+	 * @return    WPJC    Orchestrates the hooks of the plugin.
 	 */
 	public function get_loader() {
 		return $this->loader;

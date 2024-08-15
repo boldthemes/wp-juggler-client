@@ -5,15 +5,15 @@
  * @link       https://wpjuggler.com
  * @since      1.0.0
  *
- * @package    WP_Juggler_Server
- * @subpackage WP_Juggler_Server/includes
+ * @package    WP_Juggler_Client
+ * @subpackage WP_Juggler_Client/includes
  */
 
 // Prevent direct access.
-if ( ! defined( 'WPJS_PATH' ) ) exit;
+if ( ! defined( 'WPJC_PATH' ) ) exit;
 
-$WPJS_docs_url    = 'https://bettersearchreplace.com/docs/';
-$WPJS_support_url = 'https://wordpress.org/support/plugin/better-search-replace';
+$WPJC_docs_url    = 'https://bettersearchreplace.com/docs/';
+$WPJC_support_url = 'https://wordpress.org/support/plugin/better-search-replace';
 ?>
 
 <div class="ui-sidebar-wrapper">
@@ -33,7 +33,7 @@ $WPJS_support_url = 'https://wordpress.org/support/plugin/better-search-replace'
 						<?php
 						printf(
 							__( 'Free support is available on the <a href="%s">plugin support forums</a>.', 'better-search-replace' ),
-							$WPJS_support_url
+							$WPJC_support_url
 						)
 						?>
 					</p>
@@ -59,15 +59,15 @@ $WPJS_support_url = 'https://wordpress.org/support/plugin/better-search-replace'
 				<div class="row">
 					<div class="input-text full-width">
 						<label><strong><?php _e( 'System Info', 'better-search-replace' ); ?></strong></label>
-						<div><?php echo WPJS_Compatibility::get_sysinfo(); ?></div>
+						<div><?php echo WPJC_Compatibility::get_sysinfo(); ?></div>
 					</div>
 				</div>
 
 				<!--Submit Button-->
 				<div class="row">
 					<p class="submit">
-						<input type="hidden" name="action" value="WPJS_download_sysinfo" />
-						<?php wp_nonce_field( 'WPJS_download_sysinfo', 'WPJS_sysinfo_nonce' ); ?>
+						<input type="hidden" name="action" value="WPJC_download_sysinfo" />
+						<?php wp_nonce_field( 'WPJC_download_sysinfo', 'WPJC_sysinfo_nonce' ); ?>
 						<input type="submit" name="bsr-download-sysinfo" id="bsr-download-sysinfo" class="button button-secondary button-sm" value="Download System Info">
 					</p>
 				</div>
@@ -77,8 +77,8 @@ $WPJS_support_url = 'https://wordpress.org/support/plugin/better-search-replace'
 	</div>
 
 	<?php
-	if ( file_exists( WPJS_PATH . 'templates/sidebar.php' ) ) {
-		include_once WPJS_PATH . 'templates/sidebar.php';
+	if ( file_exists( WPJC_PATH . 'templates/sidebar.php' ) ) {
+		include_once WPJC_PATH . 'templates/sidebar.php';
 	}
 	?>
 
