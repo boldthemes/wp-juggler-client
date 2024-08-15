@@ -12,16 +12,12 @@
   },
   "targets": {
     "settings": {
-      "source": "./src/settings/js/wpjs-settings.js",
+      "source": "./src/settings/js/wpjc-settings.js",
       "distDir": "./assets/settings"
     },
     "dashboard": {
-      "source": "./src/dashboard/js/wpjs-dashboard.js",
+      "source": "./src/dashboard/js/wpjc-dashboard.js",
       "distDir": "./assets/dashboard"
-    },
-    "control-panel": {
-      "source": "./src/control-panel/js/wpjs-control-panel.js",
-      "distDir": "./assets/control-panel"
     }
   },
   "dependencies": {

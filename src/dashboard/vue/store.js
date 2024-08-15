@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref, watch, computed } from "vue";
 
-export const useWpjsStore = defineStore("wpjsstore", () => {
+export const useWpjcStore = defineStore("wpjcstore", () => {
   const initial = ref("Dashboard");
 
   /* watch(activetab, (newactivetab, prevactivetab) => {

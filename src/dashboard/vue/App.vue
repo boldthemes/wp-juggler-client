@@ -1,12 +1,12 @@
 <script setup>
 
-import { useWpjsStore } from './store.js'
+import { useWpjcStore } from './store.js'
 import { onMounted, computed, ref } from 'vue'
 import { useQueryClient, useQuery, useMutation } from '@tanstack/vue-query'
 
 const queryClient = useQueryClient()
 
-const store = useWpjsStore()
+const store = useWpjcStore()
 
 const nonce = ref(wpjs_dashboard_object.nonce)
 

@@ -1,1 +1,1 @@
-=== WP Juggler Server ===
+=== WP Juggler Client ===
