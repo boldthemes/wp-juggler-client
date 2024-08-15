@@ -9099,7 +9099,7 @@ exports.default = {
         const queryClient = (0, _vueQuery.useQueryClient)();
         const store = (0, _storeJs.useWpjcStore)();
         const nonce = (0, _vue.ref)(wpjc_settings_object.nonce);
-        const wpjc_cp_slug = (0, _vue.ref)("");
+        const wpjc_api_key = (0, _vue.ref)("");
         const save_loading = (0, _vue.ref)(false);
         const snackbar = (0, _vue.ref)(false);
         const snackbar_color = (0, _vue.ref)("success");
@@ -9155,13 +9155,13 @@ exports.default = {
                 action: "wpjc_get_settings"
             });
             ret = response.data;
-            wpjc_cp_slug.value = response.data.wpjc_cp_slug;
+            wpjc_api_key.value = response.data.wpjc_api_key;
             return ret;
         }
         function clickSaveSettings() {
             save_loading.value = true;
             mutation.mutate({
-                wpjc_cp_slug: wpjc_cp_slug.value
+                wpjc_api_key: wpjc_api_key.value
             });
         }
         async function saveSettings(obj) {
@@ -9173,7 +9173,7 @@ exports.default = {
             queryClient,
             store,
             nonce,
-            wpjc_cp_slug,
+            wpjc_api_key,
             save_loading,
             snackbar,
             snackbar_color,
@@ -14646,7 +14646,7 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "render", ()=>render);
 var _vue = require("vue");
-const _hoisted_1 = /*#__PURE__*/ (0, _vue.createElementVNode)("h1", null, "WP Juggler Server Settings", -1 /* HOISTED */ );
+const _hoisted_1 = /*#__PURE__*/ (0, _vue.createElementVNode)("h1", null, "WP Juggler Client Settings", -1 /* HOISTED */ );
 const _hoisted_2 = {
     class: "form-table",
     role: "presentation"
@@ -14659,7 +14659,7 @@ const _hoisted_4 = /*#__PURE__*/ (0, _vue.createElementVNode)("th", {
 }, [
     /*#__PURE__*/ (0, _vue.createElementVNode)("label", {
         for: "blogname"
-    }, "Page Slug of Control Panel")
+    }, "WP Juggler API Key")
 ], -1 /* HOISTED */ );
 const _hoisted_5 = /*#__PURE__*/ (0, _vue.createElementVNode)("p", null, null, -1 /* HOISTED */ );
 const _hoisted_6 = /*#__PURE__*/ (0, _vue.createElementVNode)("p", null, null, -1 /* HOISTED */ );
@@ -14681,15 +14681,13 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
                                 (0, _vue.createElementVNode)("td", null, [
                                     (0, _vue.withDirectives)((0, _vue.createElementVNode)("input", {
                                         type: "text",
-                                        name: "wpjccpslug",
-                                        id: "wpjccpslug",
                                         size: "50",
                                         placeholder: "",
-                                        "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event)=>$setup.wpjc_cp_slug = $event)
+                                        "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event)=>$setup.wpjc_api_key = $event)
                                     }, null, 512 /* NEED_PATCH */ ), [
                                         [
                                             (0, _vue.vModelText),
-                                            $setup.wpjc_cp_slug
+                                            $setup.wpjc_api_key
                                         ]
                                     ])
                                 ])

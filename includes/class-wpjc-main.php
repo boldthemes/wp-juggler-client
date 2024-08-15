@@ -122,7 +122,6 @@ class WP_Juggler_Client {
 		$this->loader->add_action( 'wp_ajax_wpjc_get_settings', $plugin_ajax, 'ajax_get_settings' );
 		$this->loader->add_action( 'wp_ajax_wpjc_save_settings', $plugin_ajax, 'ajax_save_settings' );
 
-
 	}
 
 	/**

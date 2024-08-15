@@ -84,10 +84,10 @@ class WPJC_AJAX
 			return;
 		}
 
-		$wpjc_cp_slug = get_option('wpjc_cp_slug');
+		$wpjc_api_key = get_option('wpjc_api_key');
 
 		$data = array(
-			'wpjc_cp_slug' => $wpjc_cp_slug ? esc_attr($wpjc_cp_slug) : '',
+			'wpjc_api_key' => $wpjc_api_key ? esc_attr($wpjc_api_key) : '',
 		);
 
 		wp_send_json_success($data, 200);
@@ -100,17 +100,17 @@ class WPJC_AJAX
 			return;
 		}
 
-		$wpjc_cp_slug = (isset($_POST['wpjc_cp_slug'])) ? sanitize_text_field($_POST['wpjc_cp_slug']) : false;
+		$wpjc_api_key = (isset($_POST['wpjc_api_key'])) ? sanitize_text_field($_POST['wpjc_api_key']) : false;
 
 		if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], $this->plugin_name . '-settings')) {
 			wp_send_json_error(new WP_Error('Unauthorized', 'Nonce is not valid'), 401);
 			exit;
 		}
 
-		if ($wpjc_cp_slug) {
-			update_option('wpjc_cp_slug',  $wpjc_cp_slug);
+		if ($wpjc_api_key) {
+			update_option('wpjc_api_key',  $wpjc_api_key);
 		} else {
-			delete_option('wpjc_cp_slug');
+			delete_option('wpjc_api_key');
 		}
 
 		$data = array();

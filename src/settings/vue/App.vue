@@ -10,7 +10,7 @@ const store = useWpjcStore()
 
 const nonce = ref(wpjc_settings_object.nonce)
 
-const wpjc_cp_slug = ref('')
+const wpjc_api_key = ref('')
 const save_loading = ref(false)
 
 const snackbar = ref(false)
@@ -69,7 +69,7 @@ async function getSettings() {
   )
   ret = response.data
 
-  wpjc_cp_slug.value = response.data.wpjc_cp_slug
+  wpjc_api_key.value = response.data.wpjc_api_key
 
   return ret
 }
@@ -77,7 +77,7 @@ async function getSettings() {
 function clickSaveSettings() {
   save_loading.value = true
   mutation.mutate({
-    wpjc_cp_slug: wpjc_cp_slug.value,
+    wpjc_api_key: wpjc_api_key.value,
   })
 }
 
@@ -93,7 +93,7 @@ async function saveSettings(obj) {
 
 <template>
 
-  <h1>WP Juggler Server Settings</h1>
+  <h1>WP Juggler Client Settings</h1>
 
   <v-card class="pa-4 mr-4">
 
@@ -101,9 +101,9 @@ async function saveSettings(obj) {
 
       <tbody v-if="data">
         <tr>
-          <th scope="row"><label for="blogname">Page Slug of Control Panel</label></th>
+          <th scope="row"><label for="blogname">WP Juggler API Key</label></th>
           <td>
-            <input type="text" name="wpjccpslug" id="wpjccpslug" size="50" placeholder="" v-model="wpjc_cp_slug">
+            <input type="text" size="50" placeholder="" v-model="wpjc_api_key">
           </td>
         </tr>
 
