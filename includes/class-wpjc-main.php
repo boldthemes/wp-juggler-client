@@ -75,10 +75,13 @@ class WP_Juggler_Client {
 	 */
 	private function load_dependencies() {
 
+		require_once WPJC_PATH . 'vendor/autoload.php';
+		require_once WPJC_PATH . 'includes/class-wpjc-wrapper.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-loader.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-i18n.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-admin.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-ajax.php';
+		require_once WPJC_PATH . 'includes/class-wpjc-service.php';
 		
 		$this->loader = new WPJC_Loader();
 	}
@@ -109,6 +112,7 @@ class WP_Juggler_Client {
 		// Initialize the admin class.
 		$plugin_admin  = new WPJC_Admin( $this->get_plugin_name(), $this->get_version() );
 		$plugin_ajax  = new WPJC_AJAX( $this->get_plugin_name(), $this->get_version() );
+		$plugin_service  = new WPJC_Service( $this->get_plugin_name(), $this->get_version() );
 		
 		/// Register the admin pages and scripts.
 		
@@ -121,6 +125,9 @@ class WP_Juggler_Client {
 
 		$this->loader->add_action( 'wp_ajax_wpjc_get_settings', $plugin_ajax, 'ajax_get_settings' );
 		$this->loader->add_action( 'wp_ajax_wpjc_save_settings', $plugin_ajax, 'ajax_save_settings' );
+
+
+		$this->loader->add_action( 'template_redirect', $plugin_service, 'wpjc_check_token' );
 
 	}
 

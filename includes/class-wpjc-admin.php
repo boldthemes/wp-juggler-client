@@ -122,7 +122,6 @@ class WPJC_Admin
 				)
 			);
 		}
-
 	}
 
 	public function register_menu_page()
@@ -169,7 +168,7 @@ class WPJC_Admin
 	{
 ?>
 		<div id="app"></div>
-	<?php
+<?php
 	}
-	
+
 }
