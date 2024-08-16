@@ -50,7 +50,7 @@ class WPJC_Service
 	{
 		$this->wp_juggler_client = $wp_juggler_client;
 		$this->version = $version;
-		$this->plugin_name = 'wpjs';
+		$this->plugin_name = 'wpjc';
 	}
 
 	private function get_algorithm()
@@ -103,7 +103,7 @@ class WPJC_Service
 		if( !$token ){
 			return;
 		}
-		
+
 		if (is_user_logged_in()) {
 			wp_redirect(admin_url());
 			exit;
