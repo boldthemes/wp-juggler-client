@@ -268,15 +268,31 @@ class WPJC_Api
 
 		$health_check_site_status = new WPJC_Health();
 
+		require_once ABSPATH . 'wp-admin/includes/admin.php';
+
+		if ( ! class_exists( 'WP_Debug_Data' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-debug-data.php';
+		}
+
+		WP_Debug_Data::check_for_updates();
+
+		$info = WP_Debug_Data::debug_data();
+
 		$data = $health_check_site_status->wpjc_health_info();
+		$data['debug'] = $info;
 
 		wp_send_json_success($data, 200);
 	}
 }
 
+
+
+
 if ( ! class_exists( 'WP_Site_Health' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-site-health.php';
 }
+
+
 
 class WPJC_Health extends WP_Site_Health{
 
@@ -286,7 +302,9 @@ class WPJC_Health extends WP_Site_Health{
 
 	public function wpjc_health_info(){
 
-		if (! function_exists('get_core_updates')) {
+		require_once ABSPATH . 'wp-admin/includes/admin.php';
+
+		/* if (! function_exists('get_core_updates')) {
 			require_once ABSPATH . 'wp-admin/includes/update.php';
 		}
 		if (! function_exists('get_plugins')) {
@@ -294,7 +312,7 @@ class WPJC_Health extends WP_Site_Health{
 		}
 		if (! function_exists('wp_check_php_version')) {
 			require_once ABSPATH . 'wp-admin/includes/misc.php';
-		}
+		} */
 
 
 		$health_check_js_variables = array(
