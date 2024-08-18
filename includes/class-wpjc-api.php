@@ -112,6 +112,13 @@ class WPJC_Api
 			'args' => array(),
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
+
+		register_rest_route('juggler/v1', '/confirmClientApi/', array(
+			'methods' => 'POST',
+			'callback' => array($this, 'confirm_client_api'),
+			'args' => array(),
+			'permission_callback' => array($this, 'api_validate_api_key')
+		));
 	}
 
 	public function test_connection(WP_REST_Request $request)
@@ -283,6 +290,14 @@ class WPJC_Api
 
 		wp_send_json_success($data, 200);
 	}
+
+	public function confirm_client_api(WP_REST_Request $request)
+	{
+
+		$data = array();
+		wp_send_json_success($data, 200);
+
+	}
 }
 
 
@@ -303,17 +318,6 @@ class WPJC_Health extends WP_Site_Health{
 	public function wpjc_health_info(){
 
 		require_once ABSPATH . 'wp-admin/includes/admin.php';
-
-		/* if (! function_exists('get_core_updates')) {
-			require_once ABSPATH . 'wp-admin/includes/update.php';
-		}
-		if (! function_exists('get_plugins')) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-		if (! function_exists('wp_check_php_version')) {
-			require_once ABSPATH . 'wp-admin/includes/misc.php';
-		} */
-
 
 		$health_check_js_variables = array(
 			'nonce'       => array(
