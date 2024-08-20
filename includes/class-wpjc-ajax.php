@@ -85,9 +85,11 @@ class WPJC_AJAX
 		}
 
 		$wpjc_api_key = get_option('wpjc_api_key');
+		$wpjc_server_url = get_option('wpjc_server_url');
 
 		$data = array(
 			'wpjc_api_key' => $wpjc_api_key ? esc_attr($wpjc_api_key) : '',
+			'wpjc_server_url' => $wpjc_server_url ? esc_attr($wpjc_server_url) : '',
 		);
 
 		wp_send_json_success($data, 200);
@@ -101,6 +103,7 @@ class WPJC_AJAX
 		}
 
 		$wpjc_api_key = (isset($_POST['wpjc_api_key'])) ? sanitize_text_field($_POST['wpjc_api_key']) : false;
+		$wpjc_server_url = (isset($_POST['wpjc_server_url'])) ? sanitize_text_field($_POST['wpjc_server_url']) : false;
 
 		if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], $this->plugin_name . '-settings')) {
 			wp_send_json_error(new WP_Error('Unauthorized', 'Nonce is not valid'), 401);
@@ -111,6 +114,12 @@ class WPJC_AJAX
 			update_option('wpjc_api_key',  $wpjc_api_key);
 		} else {
 			delete_option('wpjc_api_key');
+		}
+
+		if ($wpjc_server_url) {
+			update_option('wpjc_server_url',  $wpjc_server_url);
+		} else {
+			delete_option('wpjc_server_url');
 		}
 
 		$data = array();

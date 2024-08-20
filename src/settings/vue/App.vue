@@ -11,6 +11,7 @@ const store = useWpjcStore()
 const nonce = ref(wpjc_settings_object.nonce)
 
 const wpjc_api_key = ref('')
+const wpjc_server_url = ref('')
 const save_loading = ref(false)
 
 const snackbar = ref(false)
@@ -70,6 +71,7 @@ async function getSettings() {
   ret = response.data
 
   wpjc_api_key.value = response.data.wpjc_api_key
+  wpjc_server_url.value = response.data.wpjc_server_url
 
   return ret
 }
@@ -78,6 +80,7 @@ function clickSaveSettings() {
   save_loading.value = true
   mutation.mutate({
     wpjc_api_key: wpjc_api_key.value,
+    wpjc_server_url: wpjc_server_url.value
   })
 }
 
@@ -101,9 +104,15 @@ async function saveSettings(obj) {
 
       <tbody v-if="data">
         <tr>
-          <th scope="row"><label for="blogname">WP Juggler API Key</label></th>
+          <th scope="row"><label for="api key">WP Juggler API Key</label></th>
           <td>
             <input type="text" size="50" placeholder="" v-model="wpjc_api_key">
+          </td>
+        </tr>
+        <tr>
+          <th scope="row"><label for="server url">WP Server Url</label></th>
+          <td>
+            <input type="text" size="50" placeholder="" v-model="wpjc_server_url">
           </td>
         </tr>
 
