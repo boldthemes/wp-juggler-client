@@ -9091,7 +9091,8 @@ parcelHelpers.defineInteropFlag(exports);
 var _storeJs = require("./store.js");
 var _vue = require("vue");
 var _vueQuery = require("@tanstack/vue-query");
-const snack_succ_text = "WP Juggler Settings Saved";
+const snack_succ_text = "WP Juggler Settings Saved & Site Activated";
+const snack_error_text = "WP Juggler Site Activation Failed";
 exports.default = {
     __name: "App",
     setup (__props, { expose: __expose }) {
@@ -9133,7 +9134,7 @@ exports.default = {
                 });
                 save_loading.value = false;
                 snackbar_color.value = "error";
-                snackbar_text.value = error.responseJSON.data[0].message;
+                snackbar_text.value = "Error Code: " + error.responseJSON.data[0].code + " - " + error.responseJSON.data[0].message;
                 snackbar.value = true;
             }
         });
@@ -9183,6 +9184,7 @@ exports.default = {
             snackbar_color,
             snackbar_text,
             snack_succ_text,
+            snack_error_text,
             isLoading,
             isError,
             isFetching,

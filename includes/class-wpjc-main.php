@@ -83,6 +83,7 @@ class WP_Juggler_Client {
 		require_once WPJC_PATH . 'includes/class-wpjc-ajax.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-service.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-api.php';
+		require_once WPJC_PATH . 'includes/class-wpjc-server-api.php';
 		
 		$this->loader = new WPJC_Loader();
 	}
@@ -115,6 +116,7 @@ class WP_Juggler_Client {
 		$plugin_ajax  = new WPJC_AJAX( $this->get_plugin_name(), $this->get_version() );
 		$plugin_service  = new WPJC_Service( $this->get_plugin_name(), $this->get_version() );
 		$plugin_api  = new WPJC_Api( $this->get_plugin_name(), $this->get_version() );
+		$plugin_server_api  = new WPJC_Server_Api( $this->get_plugin_name(), $this->get_version() );
 		
 		/// Register the admin pages and scripts.
 		

@@ -17,7 +17,8 @@ const save_loading = ref(false)
 const snackbar = ref(false)
 const snackbar_color = ref('success')
 const snackbar_text = ref(snack_succ_text)
-const snack_succ_text = 'WP Juggler Settings Saved'
+const snack_succ_text = 'WP Juggler Settings Saved & Site Activated'
+const snack_error_text = 'WP Juggler Site Activation Failed'
 
 
 const { isLoading, isError, isFetching, data, error, refetch } = useQuery({
@@ -41,7 +42,7 @@ const mutation = useMutation({
     save_loading.value = false
 
     snackbar_color.value = 'error'
-    snackbar_text.value = error.responseJSON.data[0].message
+    snackbar_text.value = 'Error Code: ' + error.responseJSON.data[0].code + ' - ' + error.responseJSON.data[0].message
     snackbar.value = true
   },
 })

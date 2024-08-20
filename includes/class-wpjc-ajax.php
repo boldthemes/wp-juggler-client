@@ -122,7 +122,13 @@ class WPJC_AJAX
 			delete_option('wpjc_server_url');
 		}
 
-		$data = array();
-		wp_send_json_success($data, 200);
+		$response = WPJC_Server_Api::activate_site();
+
+		if( $response && !is_wp_error($response)){
+			$data = array();
+			wp_send_json_success($data, 200);
+		} else {
+			wp_send_json_error( $response, 400 );
+		}
 	}
 }

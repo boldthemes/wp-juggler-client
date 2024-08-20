@@ -294,6 +294,8 @@ class WPJC_Api
 	public function confirm_client_api(WP_REST_Request $request)
 	{
 
+		//wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
+		
 		$data = array();
 		wp_send_json_success($data, 200);
 
