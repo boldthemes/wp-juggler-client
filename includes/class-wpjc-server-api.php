@@ -60,13 +60,13 @@ class WPJC_Server_Api
 			'site_url' => get_site_url()
 		];
 		
-		$response = WPJC_Server_Api::call_client_api( $end_point, $data );
+		$response = WPJC_Server_Api::call_server_api( $end_point, $data );
 
 		return $response;
 
 	}
 
-	private static function call_client_api( $endpoint, $data )
+	private static function call_server_api( $endpoint, $data )
     {
 		$api_key = get_option('wpjc_api_key');
 		$site_url = get_option('wpjc_server_url');
