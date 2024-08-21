@@ -17,6 +17,7 @@ use Tmeister\Firebase\JWT\Key;
 if (! defined('WPJC_PATH')) exit;
 
 require_once WPJC_PATH . 'includes/api-classes/class-wpjc-core-checksum.php';
+require_once WPJC_PATH . 'includes/api-classes/class-wpjc-plugin-checksum.php';
 
 class WPJC_Api
 {
@@ -42,6 +43,7 @@ class WPJC_Api
 	private $plugin_name;
 
 	private $core_checksum;
+	private $plugin_checksum;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -56,6 +58,7 @@ class WPJC_Api
 		$this->version = $version;
 		$this->plugin_name = 'wpjc';
 		$this->core_checksum = new WPJCCoreChecksum();
+		$this->plugin_checksum = new WPJCPluginChecksum();
 	}
 
 	public function api_validate_api_key()
@@ -125,9 +128,9 @@ class WPJC_Api
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
 
-		register_rest_route('juggler/v1', '/coreChecksum/', array(
+		register_rest_route('juggler/v1', '/compareChecksum/', array(
 			'methods' => 'POST',
-			'callback' => array($this, 'get_core_checksum'),
+			'callback' => array($this, 'compare_checksum'),
 			'args' => array(),
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
@@ -313,17 +316,21 @@ class WPJC_Api
 
 	}
 
-	public function get_core_checksum(WP_REST_Request $request)
+	public function compare_checksum(WP_REST_Request $request)
 	{
 
 		//wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
 
 		
 		
-		$data = $this->core_checksum->get_core_checksum();
+		$data['core'] = $this->core_checksum->get_core_checksum();
+		$data['plugins'] = $this->plugin_checksum->get_plugin_checksum();
+
 		wp_send_json_success($data, 200);
 
 	}
+
+
 }
 
 if ( ! class_exists( 'WP_Site_Health' ) ) {
