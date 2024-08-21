@@ -91,18 +91,23 @@ class WPJC_Server_Api
 
 		if ($response_code != '200' && $response_code != '201') {
 
-			$body = wp_remote_retrieve_body( $response );
+			$body = wp_remote_retrieve_body($response);
 
-    		$data = json_decode( $body, true );
+			$data = json_decode($body, true);
 
-			if (array_key_exists('success', $data ) && !$data['success']){
-				$error_code = $data['data'][0]['code'];
-				$error_msg = $data['data'][0]['message'];
+			if ( json_last_error() === JSON_ERROR_NONE ) {
+
+				if (array_key_exists('success', $data) && !$data['success']) {
+					$error_code = $data['data'][0]['code'];
+					$error_msg = $data['data'][0]['message'];
+				} else {
+					$error_code = $data['code'];
+					$error_msg = $data['message'];
+				}
+				$response = new WP_Error($error_code, $error_msg);
 			} else {
-				$error_code = $data['code'];
-				$error_msg = $data['message'];
+				$response = new WP_Error('Error: ' . $response_code, 'Error retreiveng data');
 			}
-			$response = new WP_Error($error_code, $error_msg);
 		}
 
 		return $response;
