@@ -123,6 +123,13 @@ class WPJC_Service
 			exit;
 		}
 
+		$auto_login = get_user_meta($user->ID, 'wpjuggler_auto_login', true);
+
+		if ($auto_login != 'on'){
+			wp_redirect( home_url() );
+			exit;
+		}
+
 		// Log the user in
 		wp_set_current_user($user->ID);
 		wp_set_auth_cookie($user->ID);

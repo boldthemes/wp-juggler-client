@@ -125,6 +125,14 @@ class WP_Juggler_Client {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'register_menu_page_end' );
 		
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_plugin_assets' );
+
+		$this->loader->add_action('show_user_profile', $plugin_admin, 'render_user_meta');
+		$this->loader->add_action('edit_user_profile', $plugin_admin, 'render_user_meta');
+
+		$this->loader->add_action('personal_options_update', $plugin_admin, 'save_user_meta');
+		$this->loader->add_action('edit_user_profile_update', $plugin_admin, 'save_user_meta');
+
+		// Ajax
 		
 		$this->loader->add_action( 'wp_ajax_wpjc_get_dashboard', $plugin_ajax, 'ajax_get_dashboard' );
 

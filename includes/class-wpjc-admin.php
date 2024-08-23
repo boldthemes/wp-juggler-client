@@ -164,11 +164,38 @@ class WPJC_Admin
 		);
 	}
 
+	public function render_user_meta($user)
+	{
+
+?>
+		<h3><?php _e("WP Juggler Settings", "wp-juggler-client"); ?></h3>
+		<table class="form-table">
+			<tr>
+				<th><label for="wpjuggler_auto_login"><?php _e("Auto Login", "wp-juggler-client"); ?></label></th>
+				<td>
+					<input type="checkbox" name="wpjuggler_auto_login" id="wpjuggler_auto_login" <?php checked(get_user_meta($user->ID, 'wpjuggler_auto_login', true), 'on'); ?> />
+					<span class="description"><?php _e("Enable auto login for this user.", "wp-juggler-client"); ?></span>
+				</td>
+			</tr>
+		</table>
+
+	<?php
+
+	}
+
+	public function save_user_meta($user_id)
+	{
+		if (!current_user_can('edit_user', $user_id)) {
+			return false;
+		}
+	
+		update_user_meta($user_id, 'wpjuggler_auto_login', isset($_POST['wpjuggler_auto_login']) ? 'on' : 'off');
+	}
+
 	public function render_admin_page()
 	{
-?>
+	?>
 		<div id="app"></div>
 <?php
 	}
-
 }
