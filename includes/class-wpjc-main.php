@@ -84,6 +84,7 @@ class WP_Juggler_Client {
 		require_once WPJC_PATH . 'includes/class-wpjc-service.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-api.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-server-api.php';
+		require_once WPJC_PATH . 'includes/class-wpjc-background-process.php';
 		
 		$this->loader = new WPJC_Loader();
 	}

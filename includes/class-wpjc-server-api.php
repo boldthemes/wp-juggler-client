@@ -66,7 +66,7 @@ class WPJC_Server_Api
 
 	}
 
-	private static function call_server_api( $endpoint, $data )
+	public static function call_server_api( $endpoint, $data )
     {
 		$api_key = get_option('wpjc_api_key');
 		$site_url = get_option('wpjc_server_url');

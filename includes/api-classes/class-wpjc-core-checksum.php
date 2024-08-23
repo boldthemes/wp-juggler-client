@@ -43,6 +43,7 @@ class WPJCCoreChecksum {
         $wp_org_api = new WPJCWpOrgApi();
 
         try {
+			//$checksums = [];
 			$checksums = $wp_org_api->get_core_checksums( $wp_version, empty( $locale ) ? 'en_US' : $locale );
 		} catch ( Exception $exception ) {
 			//WP_CLI::error( $exception );
@@ -144,10 +145,10 @@ class WPJCCoreChecksum {
 		$versions_path = ABSPATH . 'wp-includes/version.php';
 
 		if ( ! is_readable( $versions_path ) ) {
-			WP_CLI::error(
+			/* WP_CLI::error(
 				"This does not seem to be a WordPress install.\n" .
 				'Pass --path=`path/to/wordpress` or run `wp core download`.'
-			);
+			);*/
 		}
 
 		$version_content = file_get_contents( $versions_path, false, null, 6, 2048 );

@@ -18,6 +18,7 @@ if (! defined('WPJC_PATH')) exit;
 
 require_once WPJC_PATH . 'includes/api-classes/class-wpjc-core-checksum.php';
 require_once WPJC_PATH . 'includes/api-classes/class-wpjc-plugin-checksum.php';
+require_once WPJC_PATH . 'includes/api-classes/class-wpjc-health.php';
 
 class WPJC_Api
 {
@@ -42,8 +43,10 @@ class WPJC_Api
 
 	private $plugin_name;
 
-	private $core_checksum;
-	private $plugin_checksum;
+	public $core_checksum;
+	public $plugin_checksum;
+
+	private $bg_process;
 
 	/**
 	 * Initialize the class and set its properties.
@@ -59,6 +62,8 @@ class WPJC_Api
 		$this->plugin_name = 'wpjc';
 		$this->core_checksum = new WPJCCoreChecksum();
 		$this->plugin_checksum = new WPJCPluginChecksum();
+
+		$this->bg_process = new WPJC_Background_Process($this);
 	}
 
 	public function api_validate_api_key()
@@ -114,13 +119,6 @@ class WPJC_Api
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
 
-		register_rest_route('juggler/v1', '/siteHealth/', array(
-			'methods' => 'POST',
-			'callback' => array($this, 'site_health'),
-			'args' => array(),
-			'permission_callback' => array($this, 'api_validate_api_key')
-		));
-
 		register_rest_route('juggler/v1', '/confirmClientApi/', array(
 			'methods' => 'POST',
 			'callback' => array($this, 'confirm_client_api'),
@@ -128,9 +126,9 @@ class WPJC_Api
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
 
-		register_rest_route('juggler/v1', '/compareChecksum/', array(
+		register_rest_route('juggler/v1', '/initiateTask/', array(
 			'methods' => 'POST',
-			'callback' => array($this, 'compare_checksum'),
+			'callback' => array($this, 'initiate_Task'),
 			'args' => array(),
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
@@ -207,7 +205,7 @@ class WPJC_Api
 						return;
 					}
 				} catch (Exception $ex) {
-					wp_send_json_error( new WP_Error('activation_failed', __('Failed to activate the plugin.'), array('status' => 500)), 500 );
+					wp_send_json_error(new WP_Error('activation_failed', __('Failed to activate the plugin.'), array('status' => 500)), 500);
 					return;
 				}
 			}
@@ -252,7 +250,7 @@ class WPJC_Api
 						return;
 					}
 				} catch (Exception $ex) {
-					wp_send_json_error( new WP_Error('deactivation_failed', __('Failed to deactivate the plugin.'), array('status' => 500)), 500 );
+					wp_send_json_error(new WP_Error('deactivation_failed', __('Failed to deactivate the plugin.'), array('status' => 500)), 500);
 					return;
 				}
 			}
@@ -285,127 +283,83 @@ class WPJC_Api
 		wp_send_json_success($data, 200);
 	}
 
-	public function site_health(WP_REST_Request $request)
-	{
-
-		$health_check_site_status = new WPJC_Health();
-
-		require_once ABSPATH . 'wp-admin/includes/admin.php';
-
-		if ( ! class_exists( 'WP_Debug_Data' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/class-wp-debug-data.php';
-		}
-
-		WP_Debug_Data::check_for_updates();
-
-		$info = WP_Debug_Data::debug_data();
-
-		$data = $health_check_site_status->wpjc_health_info();
-		$data['debug'] = $info;
-
-		wp_send_json_success($data, 200);
-	}
-
 	public function confirm_client_api(WP_REST_Request $request)
 	{
 
 		//wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
-		
+
 		$data = array();
 		wp_send_json_success($data, 200);
-
 	}
 
-	public function compare_checksum(WP_REST_Request $request)
+	public function initiate_task(WP_REST_Request $request)
 	{
 
-		//wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
+		$parameters = json_decode($request->get_body(), true);
 
-		
-		
-		$data['core'] = $this->core_checksum->get_core_checksum();
-		$data['plugins'] = $this->plugin_checksum->get_plugin_checksum();
-
-		wp_send_json_success($data, 200);
-
-	}
-
-
-}
-
-if ( ! class_exists( 'WP_Site_Health' ) ) {
-	require_once ABSPATH . 'wp-admin/includes/class-wp-site-health.php';
-}
-
-
-class WPJC_Health extends WP_Site_Health{
-
-	public function wpjc_perform_test( $callback ) {
-		return apply_filters( 'site_status_test_result', call_user_func( $callback ) );
-	}
-
-	public function wpjc_health_info(){
-
-		require_once ABSPATH . 'wp-admin/includes/admin.php';
-
-		$health_check_js_variables = array(
-			'nonce'       => array(
-				'site_status'        => wp_create_nonce( 'health-check-site-status' ),
-				'site_status_result' => wp_create_nonce( 'health-check-site-status-result' ),
-			),
-			'site_status' => array(
-				'direct' => array(),
-				'async'  => array(),
-				'issues' => array(
-					'good'        => 0,
-					'recommended' => 0,
-					'critical'    => 0,
-				),
-			),
-		);
-
-		$issue_counts = get_transient( 'health-check-site-status-result' );
-
-		if ( false !== $issue_counts ) {
-			$issue_counts = json_decode( $issue_counts );
-
-			$health_check_js_variables['site_status']['issues'] = $issue_counts;
+		if (!array_key_exists('taskId', $parameters) || !array_key_exists('taskType', $parameters)) {
+			wp_send_json_error(new WP_Error('Missing param', 'Either taskId or taskType are missing'), 400);
+			return;
 		}
 
-		$tests = WPJC_Health::get_tests();
+		$task_id = sanitize_text_field($parameters['taskId']);
+		$task_type = sanitize_text_field($parameters['taskType']);
 
-			foreach ( $tests['direct'] as $test ) {
-				if ( is_string( $test['test'] ) ) {
-					$test_function = sprintf(
-						'get_test_%s',
-						$test['test']
-					);
+		if ($task_type == 'checkCoreChecksum') {
+			$data = $this->core_checksum->get_core_checksum();
+		}
 
-					if ( method_exists( $this, $test_function ) && is_callable( array( $this, $test_function ) ) ) {
-						$health_check_js_variables['site_status']['direct'][] = $this->wpjc_perform_test( array( $this, $test_function ) );
-						continue;
+		if ($task_type == 'checkPluginChecksum') {
+			$data = $this->plugin_checksum->get_plugin_checksum();
+		}
+
+		if ($task_type == 'checkHealth') {
+			$health_check_site_status = new WPJC_Health();
+
+			require_once ABSPATH . 'wp-admin/includes/admin.php';
+
+			if (! class_exists('WP_Debug_Data')) {
+				require_once ABSPATH . 'wp-admin/includes/class-wp-debug-data.php';
+			}
+
+			WP_Debug_Data::check_for_updates();
+
+			$info = WP_Debug_Data::debug_data();
+
+			$data = $health_check_site_status->wpjc_health_info();
+			$data['debug'] = $info;
+		}
+
+		if ($task_type == 'checkNotices') {
+
+			global $wp_filter;
+			$dashboard_notices = array();
+
+			if (isset($wp_filter['admin_notices'])) {
+				foreach ($wp_filter['admin_notices']->callbacks as $priority => $callbacks) {
+					foreach ($callbacks as $callback) {
+						if (is_callable($callback['function'])) {
+							ob_start();
+							call_user_func($callback['function']);
+							$output = ob_get_clean();
+							if (!empty($output)) {
+								$dashboard_notices[] = $output;
+							}
+						}
 					}
 				}
-
-				if ( is_callable( $test['test'] ) ) {
-					$health_check_js_variables['site_status']['direct'][] = $this->wpjc_perform_test( $test['test'] );
-				}
 			}
 
-			foreach ( $tests['async'] as $test ) {
-				if ( is_string( $test['test'] ) ) {
-					$health_check_js_variables['site_status']['async'][] = array(
-						'test'      => $test['test'],
-						'has_rest'  => ( isset( $test['has_rest'] ) ? $test['has_rest'] : false ),
-						'completed' => false,
-						'headers'   => isset( $test['headers'] ) ? $test['headers'] : array(),
-					);
-				}
-			}
+			$data = $dashboard_notices;
+		}
 
-		return $health_check_js_variables;
+		/* $this->bg_process->push_to_queue(array(
+			'taskId' => $task_id,
+			'taskType' => $task_type
+		));
+
+		$this->bg_process->save()->dispatch(); */
+
+		wp_send_json_success($data, 200);
 	}
-
 }
-
-
