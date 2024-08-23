@@ -39,12 +39,14 @@ class WPJCPluginChecksum {
 		//$version_arg = isset( $assoc_args['version'] ) ? $assoc_args['version'] : '';
 
 		if ( empty( $plugins ) && ! $all ) {
-			WP_CLI::error( 'You need to specify either one or more plugin slugs to check or use the --all flag to check all plugins.' );
+		  //WP_CLI::error( 'You need to specify either one or more plugin slugs to check or use the --all flag to check all plugins.' );
 		}
 
 		$exclude_list = explode( ',', $exclude );
 
 		$skips = 0;
+
+		$assoc_args = [];
 
 		foreach ( $plugins as $plugin ) {
 			$version = empty( $version_arg ) ? $this->get_plugin_version( $plugin->file ) : $version_arg;

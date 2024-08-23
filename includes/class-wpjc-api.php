@@ -98,12 +98,6 @@ class WPJC_Api
 
 	public function api_register_routes()
 	{
-		register_rest_route('juggler/v1', '/getPlugins/', array(
-			'methods' => 'POST',
-			'callback' => array($this, 'get_plugins'),
-			'args' => array(),
-			'permission_callback' => array($this, 'api_validate_api_key')
-		));
 
 		register_rest_route('juggler/v1', '/activatePlugin/', array(
 			'methods' => 'POST',
@@ -132,43 +126,6 @@ class WPJC_Api
 			'args' => array(),
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
-	}
-
-	public function test_connection(WP_REST_Request $request)
-	{
-
-		$parameters = json_decode($request->get_body(), true);
-
-		if (array_key_exists('pluginSlug', $parameters) && array_key_exists('pluginVersion', $parameters)) {
-
-			$plugin_slug = sanitize_text_field($parameters['pluginSlug']);
-			$plugin_version = sanitize_text_field($parameters['pluginVersion']);
-
-			include_once(ABSPATH . 'wp-admin/includes/plugin.php');
-			include_once(ABSPATH . 'wp-admin/includes/file.php');
-			include_once(ABSPATH . 'wp-admin/includes/misc.php');
-			include_once(ABSPATH . 'wp-admin/includes/class-wp-upgrader.php');
-			include_once(ABSPATH . 'wp-admin/includes/plugin-install.php');
-
-			$installed_plugins = get_plugins();
-
-			$data = array();
-
-			foreach ($installed_plugins as $plugin_path => $plugin_info) {
-				$data[$plugin_path] = array(
-					'Name' => $plugin_info['Name'],
-					'Version' => $plugin_info['Version'],
-				);
-				/* if (strpos($plugin_path, $plugin_slug . '/') === 0) {
-					$plugin_file = $plugin_path;
-					break;
-				} */
-			}
-
-			wp_send_json_success($data, 200);
-		} else {
-			wp_send_json_error(new WP_Error('Missing param', 'Either domain or title or uid missing'), 400);
-		}
 	}
 
 	public function activate_plugin(WP_REST_Request $request)
@@ -261,28 +218,6 @@ class WPJC_Api
 		}
 	}
 
-	public function get_plugins(WP_REST_Request $request)
-	{
-
-		if (! function_exists('get_plugins')) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		$installed_plugins = get_plugins();
-
-		$data = array();
-
-		foreach ($installed_plugins as $plugin_path => $plugin_info) {
-			$data[$plugin_path] = array(
-				'Name' => $plugin_info['Name'],
-				'Version' => $plugin_info['Version'],
-				'Active' => is_plugin_active($plugin_path)
-			);
-		}
-
-		wp_send_json_success($data, 200);
-	}
-
 	public function confirm_client_api(WP_REST_Request $request)
 	{
 
@@ -353,13 +288,116 @@ class WPJC_Api
 			$data = $dashboard_notices;
 		}
 
-		/* $this->bg_process->push_to_queue(array(
-			'taskId' => $task_id,
-			'taskType' => $task_type
-		));
+		if ($task_type == 'checkPlugins') {
 
-		$this->bg_process->save()->dispatch(); */
+			if (! function_exists('get_plugins')) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			if ( ! function_exists( 'wp_update_plugins' ) ) {
+				require_once ABSPATH . 'wp-includes/update.php';
+			}
+
+			$installed_plugins = get_plugins();
+
+			wp_update_plugins();
+
+			$update_plugins = get_site_transient( 'update_plugins' );
+
+			foreach ($installed_plugins as $plugin_path => $plugin_info) {
+				$data[$plugin_path] = $plugin_info;
+				$data[$plugin_path]['Slug'] = $this->get_plugin_name($plugin_path);
+				$data[$plugin_path]['Active'] = is_plugin_active($plugin_path);
+				$data[$plugin_path]['Update'] = false;
+				$data[$plugin_path]['UpdateVersion'] = '';
+
+				if ( isset( $update_plugins->response[ $plugin_path ] ) ) {
+					$data[$plugin_path]['Update'] = true;
+					$data[$plugin_path]['UpdateVersion'] = $update_plugins->response[ $plugin_path ]->new_version;
+				}
+			}
+		}
+
+		if ($task_type == 'checkThemes') {
+
+			if (! function_exists('wp_get_themes')) {
+				require_once ABSPATH . 'wp-admin/includes/theme.php';
+			}
+
+			if (! function_exists('wp_get_theme')) {
+				require_once ABSPATH . 'wp-includes/theme.php';
+			}
+
+			if ( ! function_exists( 'wp_update_themes' ) ) {
+				require_once ABSPATH . 'wp-includes/update.php';
+			}
+
+			if ( ! function_exists( 'get_theme_updates' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/update.php';
+			}
+
+			wp_update_themes();
+
+			$themes = wp_get_themes();
+			$active_theme = wp_get_theme();
+			$active_theme_slug = $active_theme->get_stylesheet();
+
+			$updates = get_theme_updates();
+
+			$themes_info = array_map(function ($theme) {
+				return array(
+					'Name' => $theme->get('Name'),
+					'Version' => $theme->get('Version'),
+					'Author' => $theme->get('Author'),
+					'IsChildTheme' => $theme->parent() ? true : false,
+					'ThemeObject' => $theme,
+					'Update' => false,
+					'UpdateVersion' => ''
+				);
+			}, array_filter($themes, function ($theme) use ($active_theme_slug) {
+				return $theme->get_stylesheet() !== $active_theme_slug;
+			}));
+
+			foreach ($themes_info as $theme_slug => $theme) {
+				if (isset($updates[$theme_slug])) {
+					$themes_info[$theme_slug]['Update'] = true;
+					$themes_info[$theme_slug]['UpdateVersion'] = $updates[$theme_slug]->update['new_version'];
+				}
+			}
+
+			$active_theme_info = array(
+				'Name' => $active_theme->get('Name'),
+				'Version' => $active_theme->get('Version'),
+				'Author' => $active_theme->get('Author'),
+				'IsChildTheme' => $active_theme->parent() ? true : false,
+				'ThemeObject' => $active_theme,
+				'Update' => false,
+				'UpdateVersion' => ''
+			);
+
+			if (isset($updates[$active_theme_slug])) {
+				$active_theme_info['Update'] = true;
+				$active_theme_info['UpdateVersion'] = $updates[$active_theme_slug]->update['new_version'];
+			}
+
+
+			$data = array(
+				'inactive' => $themes_info,
+				'active' => $active_theme_info
+			);
+		}
 
 		wp_send_json_success($data, 200);
+	}
+
+	private function get_plugin_name($basename)
+	{
+		if (false === strpos($basename, '/')) {
+			$name = basename($basename, '.php');
+		} else {
+			$name = dirname($basename);
+		}
+
+		return $name;
 	}
 }
