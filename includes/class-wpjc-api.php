@@ -300,6 +300,8 @@ class WPJC_Api
 
 			$installed_plugins = get_plugins();
 
+			WPJC_Plugin_Updater::clear_wpjs_plugin_cache();
+
 			wp_update_plugins();
 
 			$update_plugins = get_site_transient( 'update_plugins' );
