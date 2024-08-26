@@ -113,6 +113,13 @@ class WPJC_Api
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
 
+		register_rest_route('juggler/v1', '/updatePlugin/', array(
+			'methods' => 'POST',
+			'callback' => array($this, 'update_plugin'),
+			'args' => array(),
+			'permission_callback' => array($this, 'api_validate_api_key')
+		));
+
 		register_rest_route('juggler/v1', '/confirmClientApi/', array(
 			'methods' => 'POST',
 			'callback' => array($this, 'confirm_client_api'),
@@ -154,18 +161,22 @@ class WPJC_Api
 				return;
 			}
 
-			if (!is_plugin_active($plugin_file)) {
-				try {
-					$result = activate_plugin($plugin_file);
-					if (is_wp_error($result)) {
-						wp_send_json_error($result, 500);
-						return;
-					}
-				} catch (Exception $ex) {
-					wp_send_json_error(new WP_Error('activation_failed', __('Failed to activate the plugin.'), array('status' => 500)), 500);
+			$status = $this->get_status( $plugin_file );
+			if ( in_array( $status, [ 'active', 'active-network' ], true ) ) {
+				return;
+			}
+			
+			try {
+				$result = activate_plugin($plugin_file);
+				if (is_wp_error($result)) {
+					wp_send_json_error($result, 500);
 					return;
 				}
+			} catch (Exception $ex) {
+				wp_send_json_error(new WP_Error('activation_failed', __('Failed to activate the plugin.'), array('status' => 500)), 500);
+				return;
 			}
+			
 			$data = array();
 			wp_send_json_success($data, 200);
 		} else {
@@ -211,6 +222,77 @@ class WPJC_Api
 					return;
 				}
 			}
+			$data = array();
+			wp_send_json_success($data, 200);
+		} else {
+			wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
+		}
+	}
+
+	public function update_plugin(WP_REST_Request $request)
+	{
+		$parameters = json_decode($request->get_body(), true);
+
+		if (array_key_exists('pluginSlug', $parameters)) {
+
+			if (! function_exists('get_plugins')) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			$plugin_slug = sanitize_text_field($parameters['pluginSlug']);
+
+			$installed_plugins = get_plugins();
+			$plugin_file = '';
+
+			foreach ($installed_plugins as $plugin_path => $plugin_info) {
+				if (strpos($plugin_path, $plugin_slug . '/') === 0) {
+					$plugin_file = $plugin_path;
+					break;
+				}
+			}
+
+			if (!$plugin_file) {
+				return;
+			}
+
+			$status = $this->get_status( $plugin_file );
+
+			$network_wide = ($status == 'active-network');
+			$active = false;
+		
+			if ( in_array( $status, [ 'active', 'active-network' ], true ) ) {
+				$active = true;
+			}
+
+			require_once(ABSPATH . 'wp-admin/includes/class-wp-upgrader.php');
+    		require_once(ABSPATH . 'wp-admin/includes/plugin-install.php');
+
+			$api = plugins_api('plugin_information', array('slug' => $plugin_slug));
+
+			if (is_wp_error($api)) {
+				return $api;
+			}
+
+			$upgrader = new Plugin_Upgrader(new Automatic_Upgrader_Skin());
+
+			try {
+				
+				$upgrader->upgrade($plugin_path);
+
+				if($active){
+					$result = activate_plugin($plugin_file, $network_wide);
+
+					if (is_wp_error($result)) {
+						wp_send_json_error($result, 500);
+						return;
+					}
+				}
+				
+			} catch (Exception $ex) {
+				wp_send_json_error(new WP_Error('upgrade_failed', __('Failed to upgrade the plugin.'), array('status' => 500)), 500);
+				return;
+			}
+
 			$data = array();
 			wp_send_json_success($data, 200);
 		} else {
@@ -401,5 +483,23 @@ class WPJC_Api
 		}
 
 		return $name;
+	}
+
+	protected function get_status( $file ) {
+		if ( is_plugin_active_for_network( $file ) ) {
+			return 'active-network';
+		}
+
+		if ( is_plugin_active( $file ) ) {
+			return 'active';
+		}
+
+		return 'inactive';
+	}
+
+	private function check_active( $file, $network_wide ) {
+		$required = $network_wide ? 'active-network' : 'active';
+
+		return $required === $this->get_status( $file );
 	}
 }
