@@ -305,7 +305,9 @@ class WPJC_Api
 
 		//wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
 
-		$data = array();
+		$data = array(
+			'multisite' => is_multisite()
+		);
 		wp_send_json_success($data, 200);
 	}
 

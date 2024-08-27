@@ -57,7 +57,8 @@ class WPJC_Server_Api
 
 		$end_point = 'activateSite';
 		$data = [
-			'site_url' => get_site_url()
+			'site_url' => get_site_url(),
+			'multisite' => is_multisite()
 		];
 		
 		$response = WPJC_Server_Api::call_server_api( $end_point, $data );
