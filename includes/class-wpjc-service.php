@@ -104,8 +104,16 @@ class WPJC_Service
 			return;
 		}
 
+		$url_aim = (isset($_GET['wpjs_redirect'])) ? sanitize_text_field($_GET['wpjs_redirect']) : false;
+
+		if( !$url_aim ){
+			$dest_url = admin_url();
+		} else {
+			$dest_url = $url_aim;
+		}
+
 		if (is_user_logged_in()) {
-			wp_redirect(admin_url());
+			wp_redirect( $dest_url );
 			exit;
 		}
 
@@ -135,7 +143,7 @@ class WPJC_Service
 		wp_set_auth_cookie($user->ID);
 		do_action('wp_login', $user->login, $user);
 
-		wp_redirect(admin_url());
+		wp_redirect( $dest_url );
 		exit;
 
 	}
