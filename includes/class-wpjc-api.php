@@ -305,8 +305,11 @@ class WPJC_Api
 
 		//wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
 
+		global $wp_version;
+
 		$data = array(
-			'multisite' => is_multisite()
+			'multisite' => is_multisite(),
+			'wp_version' => $wp_version
 		);
 		wp_send_json_success($data, 200);
 	}
@@ -342,10 +345,9 @@ class WPJC_Api
 			}
 
 			WP_Debug_Data::check_for_updates();
+			$data = $health_check_site_status->wpjc_health_info();
 
 			$info = WP_Debug_Data::debug_data();
-
-			$data = $health_check_site_status->wpjc_health_info();
 			$data['debug'] = $info;
 		}
 
