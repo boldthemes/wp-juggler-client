@@ -364,7 +364,9 @@ class WPJC_Api
 							call_user_func($callback['function']);
 							$output = ob_get_clean();
 							if (!empty($output)) {
-								$dashboard_notices[] = $output;
+								$dashboard_notices[] = [
+									'NoticeHTML'=> $output
+								];
 							}
 						}
 					}
