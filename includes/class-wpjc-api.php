@@ -46,6 +46,8 @@ class WPJC_Api
 	public $core_checksum;
 	public $plugin_checksum;
 
+	private $plugin_plugin_updater;
+
 	private $bg_process;
 
 	/**
@@ -55,11 +57,12 @@ class WPJC_Api
 	 * @var      string    $wp_juggler_server       The name of this plugin.
 	 * @var      string    $version    The version of this plugin.
 	 */
-	public function __construct($wp_juggler_client, $version)
+	public function __construct($wp_juggler_client, $version, $plugin_plugin_updater)
 	{
 		$this->wp_juggler_client = $wp_juggler_client;
 		$this->version = $version;
 		$this->plugin_name = 'wpjc';
+		$this->plugin_plugin_updater = $plugin_plugin_updater;
 		$this->core_checksum = new WPJCCoreChecksum();
 		$this->plugin_checksum = new WPJCPluginChecksum();
 
@@ -314,6 +317,24 @@ class WPJC_Api
 		wp_send_json_success($data, 200);
 	}
 
+	private function is_plugin_from_wp_org($plugin_slug) {
+		include_once(ABSPATH . 'wp-admin/includes/plugin-install.php');
+		
+		$info = plugins_api('plugin_information', array(
+			'slug'   => $plugin_slug,
+			'fields' => array(
+				'homepage' => true,
+				'banners'  => false,
+			)
+		));
+		
+		if (is_wp_error($info)) {
+			return false;
+		}
+	
+		return true;
+	}
+
 	public function initiate_task(WP_REST_Request $request)
 	{
 
@@ -394,12 +415,36 @@ class WPJC_Api
 
 			$update_plugins = get_site_transient( 'update_plugins' );
 
+			$data_checksum = $this->plugin_checksum->get_plugin_checksum();
+
 			foreach ($installed_plugins as $plugin_path => $plugin_info) {
+				
+				$slug = $this->get_plugin_name($plugin_path);
+
 				$data[$plugin_path] = $plugin_info;
-				$data[$plugin_path]['Slug'] = $this->get_plugin_name($plugin_path);
+				
+				$data[$plugin_path]['File'] = $plugin_path;
+				$data[$plugin_path]['Slug'] = $slug;
+				
+				if( in_array( $slug , $data_checksum['failures_list'], true)){
+					$data[$plugin_path]['Checksum'] = false;
+				} else {
+					$data[$plugin_path]['Checksum'] = true;
+				}
+
+				$data[$plugin_path]['Wporg'] = $this->is_plugin_from_wp_org( $slug );
+				$data[$plugin_path]['Multisite'] = is_multisite();
 				$data[$plugin_path]['Active'] = is_plugin_active($plugin_path);
 				$data[$plugin_path]['Update'] = false;
 				$data[$plugin_path]['UpdateVersion'] = '';
+
+				$remote = $this->plugin_plugin_updater->request();
+
+				if ( !$remote || !property_exists( $remote, $slug ) ) {
+					$data[$plugin_path]['WpJuggler'] = false;
+				} else {
+					$data[$plugin_path]['WpJuggler'] = true;
+				}
 
 				if ( isset( $update_plugins->response[ $plugin_path ] ) ) {
 					$data[$plugin_path]['Update'] = true;
