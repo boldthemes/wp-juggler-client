@@ -435,6 +435,7 @@ class WPJC_Api
 				$data[$plugin_path]['Wporg'] = $this->is_plugin_from_wp_org( $slug );
 				$data[$plugin_path]['Multisite'] = is_multisite();
 				$data[$plugin_path]['Active'] = is_plugin_active($plugin_path);
+				$data[$plugin_path]['NetworkActive'] = $this->get_status($plugin_path) == 'active-network'? true : false;
 				$data[$plugin_path]['Update'] = false;
 				$data[$plugin_path]['UpdateVersion'] = '';
 
@@ -451,6 +452,81 @@ class WPJC_Api
 					$data[$plugin_path]['UpdateVersion'] = $update_plugins->response[ $plugin_path ]->new_version;
 				}
 			}
+
+			$plugins_data = $data;
+
+			//Themes data
+
+			if (! function_exists('wp_get_themes')) {
+				require_once ABSPATH . 'wp-admin/includes/theme.php';
+			}
+
+			if (! function_exists('wp_get_theme')) {
+				require_once ABSPATH . 'wp-includes/theme.php';
+			}
+
+			if ( ! function_exists( 'wp_update_themes' ) ) {
+				require_once ABSPATH . 'wp-includes/update.php';
+			}
+
+			if ( ! function_exists( 'get_theme_updates' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/update.php';
+			}
+
+			wp_update_themes();
+
+			$themes = wp_get_themes();
+			$active_theme = wp_get_theme();
+			$active_theme_slug = $active_theme->get_stylesheet();
+
+			$updates = get_theme_updates();
+
+			$themes_info = array_map(function ($theme) {
+				return array(
+					'Name' => $theme->get('Name'),
+					'Version' => $theme->get('Version'),
+					'Author' => $theme->get('Author'),
+					'IsChildTheme' => $theme->parent() ? true : false,
+					'ThemeObject' => $theme,
+					'Update' => false,
+					'UpdateVersion' => '',
+					'Active' => false
+				);
+			}, array_filter($themes, function ($theme) use ($active_theme_slug) {
+				return $theme->get_stylesheet() !== $active_theme_slug;
+			}));
+
+			foreach ($themes_info as $theme_slug => $theme) {
+				if (isset($updates[$theme_slug])) {
+					$themes_info[$theme_slug]['Update'] = true;
+					$themes_info[$theme_slug]['UpdateVersion'] = $updates[$theme_slug]->update['new_version'];
+				}
+			}
+
+			$active_theme_info = array(
+				'Name' => $active_theme->get('Name'),
+				'Version' => $active_theme->get('Version'),
+				'Author' => $active_theme->get('Author'),
+				'IsChildTheme' => $active_theme->parent() ? true : false,
+				'ThemeObject' => $active_theme,
+				'Update' => false,
+				'UpdateVersion' => '',
+				'Active' => true
+			);
+
+			if (isset($updates[$active_theme_slug])) {
+				$active_theme_info['Update'] = true;
+				$active_theme_info['UpdateVersion'] = $updates[$active_theme_slug]->update['new_version'];
+			}
+
+			$themes_data = $themes_info;
+			$themes_data[$active_theme_slug] = $active_theme_info;
+
+			$data = array(
+				'plugins_data' => $plugins_data,
+				'themes_data' => $themes_data,
+			);
+
 		}
 
 		if ($task_type == 'checkThemes') {
