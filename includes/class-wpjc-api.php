@@ -144,6 +144,12 @@ class WPJC_Api
 
 		if (array_key_exists('pluginSlug', $parameters)) {
 
+			$network_wide = false;
+
+			if( array_key_exists('networkWide', $parameters) ){
+				$network_wide = filter_var($parameters['networkWide'], FILTER_VALIDATE_BOOLEAN);
+			}
+
 			if (! function_exists('get_plugins')) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
@@ -161,16 +167,20 @@ class WPJC_Api
 			}
 
 			if (!$plugin_file) {
+				wp_send_json_error(new WP_Error('Missing plugin', 'Plugin is not installed'), 400);
 				return;
 			}
 
 			$status = $this->get_status( $plugin_file );
 			if ( in_array( $status, [ 'active', 'active-network' ], true ) ) {
+				wp_send_json_error(new WP_Error('Plugin acivated', 'Deactivate plugin before activating it again'), 400);
 				return;
 			}
 			
 			try {
-				$result = activate_plugin($plugin_file);
+
+				$result = activate_plugin($plugin_file, '', $network_wide );
+
 				if (is_wp_error($result)) {
 					wp_send_json_error($result, 500);
 					return;
@@ -182,6 +192,7 @@ class WPJC_Api
 			
 			$data = array();
 			wp_send_json_success($data, 200);
+
 		} else {
 			wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
 		}
@@ -210,6 +221,7 @@ class WPJC_Api
 			}
 
 			if (!$plugin_file) {
+				wp_send_json_error(new WP_Error('Missing plugin', 'Plugin is not installed'), 400);
 				return;
 			}
 
@@ -255,6 +267,7 @@ class WPJC_Api
 			}
 
 			if (!$plugin_file) {
+				wp_send_json_error(new WP_Error('Missing plugin', 'Plugin is not installed'), 400);
 				return;
 			}
 
@@ -273,7 +286,8 @@ class WPJC_Api
 			$api = plugins_api('plugin_information', array('slug' => $plugin_slug));
 
 			if (is_wp_error($api)) {
-				return $api;
+				wp_send_json_error($api, 500);
+				return;
 			}
 
 			$upgrader = new Plugin_Upgrader(new Automatic_Upgrader_Skin());
@@ -370,6 +384,7 @@ class WPJC_Api
 
 			$info = WP_Debug_Data::debug_data();
 			$data['debug'] = $info;
+			$data['core_checksum'] = $this->core_checksum->get_core_checksum();
 		}
 
 		if ($task_type == 'checkNotices') {

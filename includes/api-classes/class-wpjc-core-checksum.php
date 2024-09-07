@@ -54,6 +54,7 @@ class WPJCCoreChecksum {
 		}
 
         $has_errors = false;
+		$error_files = [];
 		foreach ( $checksums as $file => $checksum ) {
 			// Skip files which get updated
 			if ( 'wp-content' === substr( $file, 0, 10 ) ) {
@@ -73,6 +74,7 @@ class WPJCCoreChecksum {
 			$md5_file = md5_file( ABSPATH . $file );
 			if ( $md5_file !== $checksum ) {
 				//WP_CLI::warning( "File doesn't verify against checksum: {$file}" );
+				$error_files[] = $file;
 				$has_errors = true;
 			}
 		}
@@ -92,8 +94,11 @@ class WPJCCoreChecksum {
 
         return [
             'errors' => $has_errors,
-            'additional' => $additional_files
+            'additional' => $values = array_values((array) $additional_files),
+			'error_files' => $error_files
         ];
+
+	
 
 		if ( ! $has_errors ) {
 			// WP_CLI::success( 'WordPress installation verifies against checksums.' );
