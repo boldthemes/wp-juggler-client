@@ -94,7 +94,7 @@ class WPJC_Service
 
 		// TODO - flow vezan za generisanje temp url-a
 
-		if( $parsed_url['path'] != '/wpjs/' ){
+		if( !$this->endsWith( $parsed_url['path'], '/wpjs/' ) ){
 			return;
 		}
 
@@ -146,6 +146,14 @@ class WPJC_Service
 		wp_redirect( $dest_url );
 		exit;
 
+	}
+
+	private function endsWith( $haystack, $needle ) {
+		if ((string) $needle === substr($haystack, -strlen($needle))){
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	private function validate_wpjs_token($token)

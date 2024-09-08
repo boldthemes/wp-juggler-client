@@ -104,21 +104,21 @@ class WPJC_Api
 
 		register_rest_route('juggler/v1', '/activatePlugin/', array(
 			'methods' => 'POST',
-			'callback' => array($this, 'activate_plugin'),
+			'callback' => array($this, 'api_activate_plugin'),
 			'args' => array(),
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
 
 		register_rest_route('juggler/v1', '/deactivatePlugin/', array(
 			'methods' => 'POST',
-			'callback' => array($this, 'deactivate_plugin'),
+			'callback' => array($this, 'api_deactivate_plugin'),
 			'args' => array(),
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
 
 		register_rest_route('juggler/v1', '/updatePlugin/', array(
 			'methods' => 'POST',
-			'callback' => array($this, 'update_plugin'),
+			'callback' => array($this, 'api_update_plugin'),
 			'args' => array(),
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
@@ -138,7 +138,7 @@ class WPJC_Api
 		));
 	}
 
-	public function activate_plugin(WP_REST_Request $request)
+	public function api_activate_plugin(WP_REST_Request $request)
 	{
 		$parameters = json_decode($request->get_body(), true);
 
@@ -198,7 +198,7 @@ class WPJC_Api
 		}
 	}
 
-	public function deactivate_plugin(WP_REST_Request $request)
+	public function api_deactivate_plugin(WP_REST_Request $request)
 	{
 		$parameters = json_decode($request->get_body(), true);
 
@@ -244,7 +244,7 @@ class WPJC_Api
 		}
 	}
 
-	public function update_plugin(WP_REST_Request $request)
+	public function api_update_plugin(WP_REST_Request $request)
 	{
 		$parameters = json_decode($request->get_body(), true);
 
@@ -304,6 +304,9 @@ class WPJC_Api
 						return;
 					}
 				}
+
+				WPJC_Plugin_Updater::clear_wpjs_plugin_cache();
+				wp_update_plugins();
 				
 			} catch (Exception $ex) {
 				wp_send_json_error(new WP_Error('upgrade_failed', __('Failed to upgrade the plugin.'), array('status' => 500)), 500);

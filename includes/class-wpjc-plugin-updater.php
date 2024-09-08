@@ -52,21 +52,21 @@ public function request(){
 		$wpjc_server_url = get_option('wpjc_server_url');
 		if ($wpjc_server_url){
 			$endpoint_url = untrailingslashit($wpjc_server_url) . '/wpjs-plugins/';
-		}
 
-		$remote = wp_remote_get( $endpoint_url, [
-				'timeout' => 10,
-				'headers' => [
-					'Accept' => 'application/json'
+			$remote = wp_remote_get( $endpoint_url, [
+					'timeout' => 10,
+					'headers' => [
+						'Accept' => 'application/json'
+					]
 				]
-			]
-		);
+			);
 
-		if ( is_wp_error( $remote ) || 200 !== wp_remote_retrieve_response_code( $remote ) || empty( wp_remote_retrieve_body( $remote ) ) ) {
-			return false;
+			if ( is_wp_error( $remote ) || 200 !== wp_remote_retrieve_response_code( $remote ) || empty( wp_remote_retrieve_body( $remote ) ) ) {
+				return false;
+			}
+
+			set_transient( $this->cache_key, $remote, DAY_IN_SECONDS );
 		}
-
-		set_transient( $this->cache_key, $remote, DAY_IN_SECONDS );
 
 	}
 

@@ -142,10 +142,10 @@
       this[globalName] = mainExports;
     }
   }
-})({"7T0Mr":[function(require,module,exports) {
+})({"jQ0Tr":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
-var HMR_PORT = 1234;
+var HMR_PORT = 57340;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "916932b22e4085ab";
 var HMR_USE_SSE = false;
@@ -9110,7 +9110,8 @@ exports.default = {
             queryKey: [
                 "wpjc-settings"
             ],
-            queryFn: getSettings
+            queryFn: getSettings,
+            refetchOnWindowFocus: false
         });
         const mutation = (0, _vueQuery.useMutation)({
             mutationFn: saveSettings,
@@ -47446,6 +47447,6 @@ function findComponentParent(vnode, root) {
     return root;
 }
 
-},{"vue":"gCTam","../util/index.mjs":"ivUh8","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"4aEO8":[function() {},{}],"6KE1a":[function() {},{}]},["7T0Mr","48S2j"], "48S2j", "parcelRequire94c2")
+},{"vue":"gCTam","../util/index.mjs":"ivUh8","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"4aEO8":[function() {},{}],"6KE1a":[function() {},{}]},["jQ0Tr","48S2j"], "48S2j", "parcelRequire94c2")
 
 //# sourceMappingURL=wpjc-settings.js.map

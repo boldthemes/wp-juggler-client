@@ -23,7 +23,8 @@ const snack_error_text = 'WP Juggler Site Activation Failed'
 
 const { isLoading, isError, isFetching, data, error, refetch } = useQuery({
   queryKey: ['wpjc-settings'],
-  queryFn: getSettings
+  queryFn: getSettings,
+  refetchOnWindowFocus: false
 })
 
 const mutation = useMutation({
