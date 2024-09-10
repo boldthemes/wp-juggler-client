@@ -119,6 +119,7 @@ class WP_Juggler_Client {
 		$plugin_service  = new WPJC_Service( $this->get_plugin_name(), $this->get_version() );
 		$plugin_server_api  = new WPJC_Server_Api( $this->get_plugin_name(), $this->get_version() );
 		$plugin_plugin_updater  = new WPJC_Plugin_Updater( $this->get_plugin_name(), $this->get_version() );
+		$tgmpa_updater = new WPJC_TGMPA_Updater();
 		$plugin_api  = new WPJC_Api( $this->get_plugin_name(), $this->get_version(), $plugin_plugin_updater );
 		
 		/// Register the admin pages and scripts.
@@ -145,6 +146,7 @@ class WP_Juggler_Client {
 		$this->loader->add_action( 'template_redirect', $plugin_service, 'wpjc_check_token' );
 
 		$this->loader->add_action( 'rest_api_init', $plugin_api, 'api_register_routes' );
+		$this->loader->add_action( 'init', $plugin_api, 'api_load_tgmpa', 8 );
 
 		// Plugin updater
 		
@@ -152,6 +154,8 @@ class WP_Juggler_Client {
 		$this->loader->add_filter( 'site_transient_update_plugins', $plugin_plugin_updater, 'update' );
 		$this->loader->add_filter( 'upgrader_process_complete', $plugin_plugin_updater, 'purge', 10, 2 );
 		$this->loader->add_filter( 'http_request_args', $plugin_plugin_updater, 'bypass_verification_for_updater', 10, 2 );
+
+		$this->loader->add_action( 'wp_loaded', $tgmpa_updater, '__construct' );
 
 	}
 

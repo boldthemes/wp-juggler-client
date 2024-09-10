@@ -102,6 +102,18 @@ class WPJC_Api
 	public function api_register_routes()
 	{
 
+		$args = array(
+			'role'    => 'administrator',
+			'orderby' => 'ID',
+			'order'   => 'ASC',
+			'number'  => 1
+		);
+
+		$users = get_users($args);
+		
+		$our_user = !empty($users) ? $users[0] : false;
+		if ($our_user) wp_set_current_user($our_user->ID);
+
 		register_rest_route('juggler/v1', '/activatePlugin/', array(
 			'methods' => 'POST',
 			'callback' => array($this, 'api_activate_plugin'),
@@ -146,7 +158,7 @@ class WPJC_Api
 
 			$network_wide = false;
 
-			if( array_key_exists('networkWide', $parameters) ){
+			if (array_key_exists('networkWide', $parameters)) {
 				$network_wide = filter_var($parameters['networkWide'], FILTER_VALIDATE_BOOLEAN);
 			}
 
@@ -171,15 +183,15 @@ class WPJC_Api
 				return;
 			}
 
-			$status = $this->get_status( $plugin_file );
-			if ( in_array( $status, [ 'active', 'active-network' ], true ) ) {
+			$status = $this->get_status($plugin_file);
+			if (in_array($status, ['active', 'active-network'], true)) {
 				wp_send_json_error(new WP_Error('Plugin acivated', 'Deactivate plugin before activating it again'), 400);
 				return;
 			}
-			
+
 			try {
 
-				$result = activate_plugin($plugin_file, '', $network_wide );
+				$result = activate_plugin($plugin_file, '', $network_wide);
 
 				if (is_wp_error($result)) {
 					wp_send_json_error($result, 500);
@@ -189,10 +201,9 @@ class WPJC_Api
 				wp_send_json_error(new WP_Error('activation_failed', __('Failed to activate the plugin.'), array('status' => 500)), 500);
 				return;
 			}
-			
+
 			$data = array();
 			wp_send_json_success($data, 200);
-
 		} else {
 			wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
 		}
@@ -271,17 +282,17 @@ class WPJC_Api
 				return;
 			}
 
-			$status = $this->get_status( $plugin_file );
+			$status = $this->get_status($plugin_file);
 
 			$network_wide = ($status == 'active-network');
 			$active = false;
-		
-			if ( in_array( $status, [ 'active', 'active-network' ], true ) ) {
+
+			if (in_array($status, ['active', 'active-network'], true)) {
 				$active = true;
 			}
 
 			require_once(ABSPATH . 'wp-admin/includes/class-wp-upgrader.php');
-    		require_once(ABSPATH . 'wp-admin/includes/plugin-install.php');
+			require_once(ABSPATH . 'wp-admin/includes/plugin-install.php');
 
 			$api = plugins_api('plugin_information', array('slug' => $plugin_slug));
 
@@ -293,10 +304,10 @@ class WPJC_Api
 			$upgrader = new Plugin_Upgrader(new Automatic_Upgrader_Skin());
 
 			try {
-				
+
 				$upgrader->upgrade($plugin_path);
 
-				if($active){
+				if ($active) {
 					$result = activate_plugin($plugin_file, $network_wide);
 
 					if (is_wp_error($result)) {
@@ -307,7 +318,6 @@ class WPJC_Api
 
 				WPJC_Plugin_Updater::clear_wpjs_plugin_cache();
 				wp_update_plugins();
-				
 			} catch (Exception $ex) {
 				wp_send_json_error(new WP_Error('upgrade_failed', __('Failed to upgrade the plugin.'), array('status' => 500)), 500);
 				return;
@@ -334,9 +344,10 @@ class WPJC_Api
 		wp_send_json_success($data, 200);
 	}
 
-	private function is_plugin_from_wp_org($plugin_slug) {
+	private function is_plugin_from_wp_org($plugin_slug)
+	{
 		include_once(ABSPATH . 'wp-admin/includes/plugin-install.php');
-		
+
 		$info = plugins_api('plugin_information', array(
 			'slug'   => $plugin_slug,
 			'fields' => array(
@@ -344,12 +355,22 @@ class WPJC_Api
 				'banners'  => false,
 			)
 		));
-		
+
 		if (is_wp_error($info)) {
 			return false;
 		}
-	
+
 		return true;
+	}
+
+	public function api_load_tgmpa()
+	{
+		if (isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/wp-json/juggler/v1/initiateTask') !== false) {
+			add_filter('tgmpa_load', '__return_true');
+
+			require_once ABSPATH . 'wp-admin/includes/template.php';
+
+		}
 	}
 
 	public function initiate_task(WP_REST_Request $request)
@@ -404,7 +425,7 @@ class WPJC_Api
 							$output = ob_get_clean();
 							if (!empty($output)) {
 								$dashboard_notices[] = [
-									'NoticeHTML'=> $output
+									'NoticeHTML' => $output
 								];
 							}
 						}
@@ -421,7 +442,7 @@ class WPJC_Api
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
 
-			if ( ! function_exists( 'wp_update_plugins' ) ) {
+			if (! function_exists('wp_update_plugins')) {
 				require_once ABSPATH . 'wp-includes/update.php';
 			}
 
@@ -431,43 +452,43 @@ class WPJC_Api
 
 			wp_update_plugins();
 
-			$update_plugins = get_site_transient( 'update_plugins' );
+			$update_plugins = get_site_transient('update_plugins');
 
 			$data_checksum = $this->plugin_checksum->get_plugin_checksum();
 
 			foreach ($installed_plugins as $plugin_path => $plugin_info) {
-				
+
 				$slug = $this->get_plugin_name($plugin_path);
 
 				$data[$plugin_path] = $plugin_info;
-				
+
 				$data[$plugin_path]['File'] = $plugin_path;
 				$data[$plugin_path]['Slug'] = $slug;
-				
-				if( in_array( $slug , $data_checksum['failures_list'], true)){
+
+				if (in_array($slug, $data_checksum['failures_list'], true)) {
 					$data[$plugin_path]['Checksum'] = false;
 				} else {
 					$data[$plugin_path]['Checksum'] = true;
 				}
 
-				$data[$plugin_path]['Wporg'] = $this->is_plugin_from_wp_org( $slug );
+				$data[$plugin_path]['Wporg'] = $this->is_plugin_from_wp_org($slug);
 				$data[$plugin_path]['Multisite'] = is_multisite();
 				$data[$plugin_path]['Active'] = is_plugin_active($plugin_path);
-				$data[$plugin_path]['NetworkActive'] = $this->get_status($plugin_path) == 'active-network'? true : false;
+				$data[$plugin_path]['NetworkActive'] = $this->get_status($plugin_path) == 'active-network' ? true : false;
 				$data[$plugin_path]['Update'] = false;
 				$data[$plugin_path]['UpdateVersion'] = '';
 
 				$remote = $this->plugin_plugin_updater->request();
 
-				if ( !$remote || !property_exists( $remote, $slug ) ) {
+				if (!$remote || !property_exists($remote, $slug)) {
 					$data[$plugin_path]['WpJuggler'] = false;
 				} else {
 					$data[$plugin_path]['WpJuggler'] = true;
 				}
 
-				if ( isset( $update_plugins->response[ $plugin_path ] ) ) {
+				if (isset($update_plugins->response[$plugin_path])) {
 					$data[$plugin_path]['Update'] = true;
-					$data[$plugin_path]['UpdateVersion'] = $update_plugins->response[ $plugin_path ]->new_version;
+					$data[$plugin_path]['UpdateVersion'] = $update_plugins->response[$plugin_path]->new_version;
 				}
 			}
 
@@ -483,11 +504,11 @@ class WPJC_Api
 				require_once ABSPATH . 'wp-includes/theme.php';
 			}
 
-			if ( ! function_exists( 'wp_update_themes' ) ) {
+			if (! function_exists('wp_update_themes')) {
 				require_once ABSPATH . 'wp-includes/update.php';
 			}
 
-			if ( ! function_exists( 'get_theme_updates' ) ) {
+			if (! function_exists('get_theme_updates')) {
 				require_once ABSPATH . 'wp-admin/includes/update.php';
 			}
 
@@ -544,7 +565,6 @@ class WPJC_Api
 				'plugins_data' => $plugins_data,
 				'themes_data' => $themes_data,
 			);
-
 		}
 
 		if ($task_type == 'checkThemes') {
@@ -557,11 +577,11 @@ class WPJC_Api
 				require_once ABSPATH . 'wp-includes/theme.php';
 			}
 
-			if ( ! function_exists( 'wp_update_themes' ) ) {
+			if (! function_exists('wp_update_themes')) {
 				require_once ABSPATH . 'wp-includes/update.php';
 			}
 
-			if ( ! function_exists( 'get_theme_updates' ) ) {
+			if (! function_exists('get_theme_updates')) {
 				require_once ABSPATH . 'wp-admin/includes/update.php';
 			}
 
@@ -630,21 +650,23 @@ class WPJC_Api
 		return $name;
 	}
 
-	protected function get_status( $file ) {
-		if ( is_plugin_active_for_network( $file ) ) {
+	protected function get_status($file)
+	{
+		if (is_plugin_active_for_network($file)) {
 			return 'active-network';
 		}
 
-		if ( is_plugin_active( $file ) ) {
+		if (is_plugin_active($file)) {
 			return 'active';
 		}
 
 		return 'inactive';
 	}
 
-	private function check_active( $file, $network_wide ) {
+	private function check_active($file, $network_wide)
+	{
 		$required = $network_wide ? 'active-network' : 'active';
 
-		return $required === $this->get_status( $file );
+		return $required === $this->get_status($file);
 	}
 }

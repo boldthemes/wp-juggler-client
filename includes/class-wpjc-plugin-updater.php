@@ -152,8 +152,6 @@ public function update( $transient ) {
 
 	$all_plugins = get_plugins();
     
-    $plugin_slugs = array();
-    
     foreach ( $all_plugins as $plugin_file => $plugin_data ) {
         
         $slug = $this->get_plugin_name( $plugin_file ) ;
@@ -216,5 +214,103 @@ public function bypass_verification_for_updater( $args, $url ) {
 
     return $args;
 }
+
+}
+
+
+class WPJC_TGMPA_Updater {
+
+    public function __construct() {
+
+        if ( class_exists("TGM_Plugin_Activation") && has_action("tgmpa_register") ) {
+            add_filter( 'plugins_api', [ $this, 'info' ], 20, 3 );
+            add_filter( 'site_transient_update_plugins', [ $this, 'update' ] );
+        }
+
+    }
+
+    public function plugins() {
+
+        // fetch tgmpa plugins with external downloads
+        do_action("tgmpa_register");
+        $tgmpa    = $GLOBALS['tgmpa'];
+        $tgmpa->populate_file_path();
+
+        if ( empty( $tgmpa->plugins ) ) {
+            return [];
+        }
+
+        return $tgmpa->plugins;
+
+    }
+
+    function info( $response, $action, $args ) {
+
+        // do nothing if you're not getting plugin information right now
+        if ( 'plugin_information' !== $action || empty( $response ) ) {
+            //return $response;
+        }
+
+        // get updates
+        $plugins = $this->plugins();
+
+        if ( empty( $plugins ) ) {
+            return $response;
+        }
+
+        // do nothing if plugin not in TGM Plugin Activation
+        if ( empty( $args->slug ) || ! in_array( $args->slug, array_keys( $plugins ) ) ) {
+            return $response;
+        }
+
+		if( $plugins[ $args->slug ]["source_type"] !='bundled' ){
+			return $response;
+		}
+
+		if(!is_object($response)){
+			$response = new stdClass();
+		}
+
+        $response->version        = $plugins[ $args->slug ]["version"];
+        $response->download_link  = $plugins[ $args->slug ]["source"];
+        $response->trunk          = $plugins[ $args->slug ]["source"];
+
+        return $response;
+
+    }
+
+    public function update( $transient ) {
+
+        if ( empty( $transient->checked ) ) {
+            return $transient;
+        }
+
+        $plugins                      = $this->plugins();
+        $installed_plugins            = get_plugins();
+        $installed_plugins_file_paths = array_keys( $installed_plugins );
+
+        foreach( $plugins as $plugin ) {
+
+            $plugin                = (object) $plugin;
+
+            // Skip if TGMPA plugin not installed
+            if ( ! in_array( $plugin->file_path, $installed_plugins_file_paths ) ) {
+                continue;
+            }
+
+            $response              = new \stdClass();
+            $response->slug        = $plugin->slug;
+            $response->plugin      = $plugin->file_path;
+            $response->new_version = $plugin->version;
+            $response->package     = $plugin->source;
+
+            if ( version_compare( $installed_plugins[ $plugin->file_path ]["Version"], $plugin->version, '<' ) ) {
+                $transient->response[ $plugin->file_path ] = $response;
+            }
+        }
+
+        return $transient;
+
+    }
 
 }
