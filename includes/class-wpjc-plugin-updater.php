@@ -244,7 +244,7 @@ class WPJC_TGMPA_Updater {
 
     }
 
-    function info( $response, $action, $args ) {
+    public function info( $response, $action, $args ) {
 
         // do nothing if you're not getting plugin information right now
         if ( 'plugin_information' !== $action || empty( $response ) ) {

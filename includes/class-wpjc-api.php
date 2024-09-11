@@ -373,6 +373,23 @@ class WPJC_Api
 		}
 	}
 
+	private function is_tgmpa_plugin_bundled($plugin_slug) {
+		// Check if the TGM Plugin Activation class exists
+		if (class_exists('TGM_Plugin_Activation')) {
+			// Get TGMPA instance
+			$tgmpa    = $GLOBALS['tgmpa'];
+			
+			// Loop through registered plugins
+			foreach ($tgmpa->plugins as $plugin) {
+				if ($plugin['slug'] === $plugin_slug && isset($plugin['source_type']) && $plugin['source_type'] === 'bundled') {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
+
 	public function initiate_task(WP_REST_Request $request)
 	{
 
@@ -485,6 +502,9 @@ class WPJC_Api
 				} else {
 					$data[$plugin_path]['WpJuggler'] = true;
 				}
+
+				$is_tgmpa = $this->is_tgmpa_plugin_bundled($slug);
+				$data[$plugin_path]['Tgmpa'] = $is_tgmpa;
 
 				if (isset($update_plugins->response[$plugin_path])) {
 					$data[$plugin_path]['Update'] = true;
