@@ -86,6 +86,7 @@ class WP_Juggler_Client {
 		require_once WPJC_PATH . 'includes/class-wpjc-server-api.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-background-process.php';
 		require_once WPJC_PATH . 'includes/class-wpjc-plugin-updater.php';
+		require_once WPJC_PATH . 'includes/class-wpjc-github-updater.php';
 		
 		$this->loader = new WPJC_Loader();
 	}
@@ -119,6 +120,7 @@ class WP_Juggler_Client {
 		$plugin_service  = new WPJC_Service( $this->get_plugin_name(), $this->get_version() );
 		$plugin_server_api  = new WPJC_Server_Api( $this->get_plugin_name(), $this->get_version() );
 		$plugin_plugin_updater  = new WPJC_Plugin_Updater( $this->get_plugin_name(), $this->get_version() );
+		$plugin_github_updater  = new WPJC_Github_Updater( $this->get_plugin_name(), $this->get_version() );
 		$tgmpa_updater = new WPJC_TGMPA_Updater();
 		$plugin_api  = new WPJC_Api( $this->get_plugin_name(), $this->get_version(), $plugin_plugin_updater );
 		
@@ -154,6 +156,13 @@ class WP_Juggler_Client {
 		$this->loader->add_filter( 'site_transient_update_plugins', $plugin_plugin_updater, 'update' );
 		$this->loader->add_filter( 'upgrader_process_complete', $plugin_plugin_updater, 'purge', 10, 2 );
 		$this->loader->add_filter( 'http_request_args', $plugin_plugin_updater, 'bypass_verification_for_updater', 10, 2 );
+
+		// Github updater
+
+		$this->loader->add_filter( 'plugins_api', $plugin_github_updater, 'github_info', 20, 3 );
+		$this->loader->add_filter( 'site_transient_update_plugins', $plugin_github_updater, 'github_update');
+		$this->loader->add_filter( 'upgrader_process_complete', $plugin_github_updater, 'purge', 10, 2 );
+        //add_filter('upgrader_post_install', 'my_plugin_after_update', 10, 3 );
 
 		$this->loader->add_action( 'wp_loaded', $tgmpa_updater, '__construct' );
 

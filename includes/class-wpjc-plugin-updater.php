@@ -173,8 +173,6 @@ public function update( $transient ) {
 
     }
 
-	// TODO ++ovde treba odraditi za svaki plugin koji je u nasoj listi i koji je instaliran
-
 	return $transient;
 
 }
