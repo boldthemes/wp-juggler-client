@@ -102,8 +102,9 @@ class WPJC_Github_Updater
             $response->download_link  = $update_info->download_url;
             $response->trunk          = $update_info->download_url;
             $response->requires_php   = $update_info->requires_php;
-            $response->last_updated   = $update_info->last_updated;
-
+            if (! empty($update_info->last_updated)) {
+                $response->last_updated    = $update_info->last_updated;
+            }
             $response->new_version    = $update_info->version;
 
             $response->sections = [
