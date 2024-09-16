@@ -9,6 +9,7 @@
 	"tested" : "6.1",
 	"requires_php" : "5.6",
 	"homepage" : "https://bold-themes.com",
+    "last_updated" : "9/16/2024",
 	"sections" : {
 		"description" : "Client module of WP Juggler",
 		"installation" : "Click the activate button and that's it.",

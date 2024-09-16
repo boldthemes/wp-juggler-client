@@ -75,13 +75,50 @@ class WPJC_Github_Updater
             return $response;
         }
 
-        $plugin_slug = 'wp-juggler-client';
+        if (empty($args->slug)) {
+            return $response;
+        }
+
+        $plugin_slug = 'wp-juggler-client/wp-juggler-client.php';
+
         $update_info = $this->get_github_update_info();
 
-        if (isset($response->slug) && $response->slug === $plugin_slug) {
-            $response->new_version = $update_info->version;
-            $response->package = $update_info->download_url;
-            $response->slug = $plugin_slug;
+        $response = new \stdClass();
+
+        if (!empty($args->slug) && $args->slug === $plugin_slug) {
+
+
+            $response->name           = $update_info->name;
+            $response->slug           = $update_info->slug;
+            $response->version        = $update_info->version;
+            $response->tested         = $update_info->tested;
+            $response->requires       = $update_info->requires;
+            $response->author         = $update_info->author;
+            $response->author_profile = $update_info->author_profile;
+            if (! empty($update_info->donate_link)) {
+                $response->donate_link    = $update_info->donate_link;
+            }
+            $response->homepage       = $update_info->homepage;
+            $response->download_link  = $update_info->download_url;
+            $response->trunk          = $update_info->download_url;
+            $response->requires_php   = $update_info->requires_php;
+            $response->last_updated   = $update_info->last_updated;
+
+            $response->new_version    = $update_info->version;
+
+            $response->sections = [
+                'description'  => $update_info->sections->description,
+                'installation' => $update_info->sections->installation,
+                'changelog'    => $update_info->sections->changelog
+            ];
+
+            if (! empty( $update_info->banners)) {
+                $response->banners = [
+                    'low'  => $update_info->banners->low,
+                    'high' => $update_info->banners->high
+                ];
+            }
+            
         }
 
         return $response;
