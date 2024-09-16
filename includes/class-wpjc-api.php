@@ -433,6 +433,10 @@ class WPJC_Api
 			global $wp_filter;
 			$dashboard_notices = array();
 
+			if (! function_exists('get_current_screen')) {
+				require_once ABSPATH . 'wp-admin/includes/screen.php';
+			}
+
 			if (isset($wp_filter['admin_notices'])) {
 				foreach ($wp_filter['admin_notices']->callbacks as $priority => $callbacks) {
 					foreach ($callbacks as $callback) {
