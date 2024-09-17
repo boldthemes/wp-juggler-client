@@ -47,6 +47,7 @@ class WPJC_Api
 	public $plugin_checksum;
 
 	private $plugin_plugin_updater;
+	private $plugin_github_updater;
 
 	private $bg_process;
 
@@ -57,12 +58,13 @@ class WPJC_Api
 	 * @var      string    $wp_juggler_server       The name of this plugin.
 	 * @var      string    $version    The version of this plugin.
 	 */
-	public function __construct($wp_juggler_client, $version, $plugin_plugin_updater)
+	public function __construct($wp_juggler_client, $version, $plugin_plugin_updater, $plugin_github_updater)
 	{
 		$this->wp_juggler_client = $wp_juggler_client;
 		$this->version = $version;
 		$this->plugin_name = 'wpjc';
 		$this->plugin_plugin_updater = $plugin_plugin_updater;
+		$this->plugin_github_updater = $plugin_github_updater;
 		$this->core_checksum = new WPJCCoreChecksum();
 		$this->plugin_checksum = new WPJCPluginChecksum();
 
@@ -468,6 +470,9 @@ class WPJC_Api
 			}
 
 			$installed_plugins = get_plugins();
+
+			$this->plugin_plugin_updater->delete_transient();
+			$this->plugin_github_updater->delete_transient();
 
 			WPJC_Plugin_Updater::clear_wpjs_plugin_cache();
 

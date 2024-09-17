@@ -119,10 +119,12 @@ class WP_Juggler_Client {
 		$plugin_ajax  = new WPJC_AJAX( $this->get_plugin_name(), $this->get_version() );
 		$plugin_service  = new WPJC_Service( $this->get_plugin_name(), $this->get_version() );
 		$plugin_server_api  = new WPJC_Server_Api( $this->get_plugin_name(), $this->get_version() );
+
 		$plugin_plugin_updater  = new WPJC_Plugin_Updater( $this->get_plugin_name(), $this->get_version() );
 		$plugin_github_updater  = new WPJC_Github_Updater( $this->get_plugin_name(), $this->get_version() );
+
 		$tgmpa_updater = new WPJC_TGMPA_Updater();
-		$plugin_api  = new WPJC_Api( $this->get_plugin_name(), $this->get_version(), $plugin_plugin_updater );
+		$plugin_api  = new WPJC_Api( $this->get_plugin_name(), $this->get_version(), $plugin_plugin_updater, $plugin_github_updater );
 		
 		/// Register the admin pages and scripts.
 		

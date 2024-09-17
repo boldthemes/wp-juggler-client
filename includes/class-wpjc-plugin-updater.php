@@ -54,7 +54,7 @@ public function request(){
 			$endpoint_url = untrailingslashit($wpjc_server_url) . '/wpjs-plugins/';
 
 			$remote = wp_remote_get( $endpoint_url, [
-					'timeout' => 10,
+					'timeout' => 20,
 					'headers' => [
 						'Accept' => 'application/json'
 					]
@@ -65,7 +65,7 @@ public function request(){
 				return false;
 			}
 
-			set_transient( $this->cache_key, $remote, DAY_IN_SECONDS );
+			set_transient( $this->cache_key, $remote, HOUR_IN_SECONDS );
 		}
 
 	}
@@ -175,6 +175,10 @@ public function update( $transient ) {
 
 	return $transient;
 
+}
+
+public function delete_transient(){
+	delete_transient( $this->cache_key );
 }
 
 public function purge( $upgrader, $options ) {

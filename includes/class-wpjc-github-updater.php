@@ -43,10 +43,9 @@ class WPJC_Github_Updater
 
     public function get_github_update_info()
     {
-
         $remote_info = get_transient($this->cache_key);
 
-        if (false === $remote_info) {
+        if ( false === $remote_info || ! $this->cache_allowed ) {
             $response = wp_remote_get('https://raw.githubusercontent.com/boldthemes/wp-juggler-client/master/info.json');
 
             if (!is_wp_error($response) && $response['response']['code'] == 200) {
@@ -62,7 +61,7 @@ class WPJC_Github_Updater
                     }
                 }
 
-                set_transient($this->cache_key, $remote_info, 6 * HOUR_IN_SECONDS);
+                set_transient($this->cache_key, $remote_info, HOUR_IN_SECONDS);
             }
         }
 
@@ -152,6 +151,10 @@ class WPJC_Github_Updater
         }
 
         return $transient;
+    }
+
+    public function delete_transient(){
+        delete_transient( $this->cache_key );
     }
 
     public function purge($upgrader, $options)
