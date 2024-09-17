@@ -112,7 +112,7 @@ class WPJC_Api
 		);
 
 		$users = get_users($args);
-		
+
 		$our_user = !empty($users) ? $users[0] : false;
 		if ($our_user) wp_set_current_user($our_user->ID);
 
@@ -371,16 +371,16 @@ class WPJC_Api
 			add_filter('tgmpa_load', '__return_true');
 
 			require_once ABSPATH . 'wp-admin/includes/template.php';
-
 		}
 	}
 
-	private function is_tgmpa_plugin_bundled($plugin_slug) {
+	private function is_tgmpa_plugin_bundled($plugin_slug)
+	{
 		// Check if the TGM Plugin Activation class exists
 		if (class_exists('TGM_Plugin_Activation')) {
 			// Get TGMPA instance
 			$tgmpa    = $GLOBALS['tgmpa'];
-			
+
 			// Loop through registered plugins
 			foreach ($tgmpa->plugins as $plugin) {
 				if ($plugin['slug'] === $plugin_slug && isset($plugin['source_type']) && $plugin['source_type'] === 'bundled') {
@@ -388,7 +388,7 @@ class WPJC_Api
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -444,7 +444,13 @@ class WPJC_Api
 					foreach ($callbacks as $callback) {
 						if (is_callable($callback['function'])) {
 							ob_start();
-							call_user_func($callback['function']);
+							try {
+								call_user_func($callback['function']);
+							} catch (Throwable $e) {
+								$output = ob_get_clean();
+								break;
+							}
+
 							$output = ob_get_clean();
 							if (!empty($output)) {
 								$dashboard_notices[] = [
