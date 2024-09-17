@@ -70,7 +70,7 @@ class WPJC_Server_Api
 	public static function call_server_api( $endpoint, $data )
     {
 		$api_key = get_option('wpjc_api_key');
-		$site_url = get_option('wpjc_server_url');
+		$site_url = get_site_option('wpjc_server_url');
 
 		if (!$site_url || !$api_key){
 			return false;

@@ -49,7 +49,7 @@ public function request(){
 
 	// TODO ++ dovuci sve sto im treba za sve pluginove
 
-		$wpjc_server_url = get_option('wpjc_server_url');
+		$wpjc_server_url = get_site_option('wpjc_server_url');
 		if ($wpjc_server_url){
 			$endpoint_url = untrailingslashit($wpjc_server_url) . '/wpjs-plugins/';
 
@@ -203,7 +203,7 @@ static function clear_wpjs_plugin_cache(){
 
 public function bypass_verification_for_updater( $args, $url ) {
 
-	$wpjc_server_url = get_option('wpjc_server_url');
+	$wpjc_server_url = get_site_option('wpjc_server_url');
 
 	if ( strpos($url, untrailingslashit($wpjc_server_url)) !==false  ){
 		$args['reject_unsafe_urls'] = false;

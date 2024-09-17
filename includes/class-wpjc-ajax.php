@@ -85,7 +85,7 @@ class WPJC_AJAX
 		}
 
 		$wpjc_api_key = get_option('wpjc_api_key');
-		$wpjc_server_url = get_option('wpjc_server_url');
+		$wpjc_server_url = get_site_option('wpjc_server_url');
 
 		$data = array(
 			'wpjc_api_key' => $wpjc_api_key ? esc_attr($wpjc_api_key) : '',
@@ -117,9 +117,9 @@ class WPJC_AJAX
 		}
 
 		if ($wpjc_server_url) {
-			update_option('wpjc_server_url',  $wpjc_server_url);
+			update_site_option('wpjc_server_url',  $wpjc_server_url);
 		} else {
-			delete_option('wpjc_server_url');
+			delete_site_option('wpjc_server_url');
 		}
 
 		$response = WPJC_Server_Api::activate_site();
