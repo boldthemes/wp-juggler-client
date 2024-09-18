@@ -129,7 +129,7 @@ class WP_Juggler_Client {
 		/// Register the admin pages and scripts.
 		
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'register_menu_page', 9 );
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'register_menu_page_end' );
+		//$this->loader->add_action( 'admin_menu', $plugin_admin, 'register_menu_page_end' );
 		
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_plugin_assets' );
 

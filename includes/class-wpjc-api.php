@@ -73,10 +73,12 @@ class WPJC_Api
 
 	public function api_validate_api_key()
 	{
-		$auth_header = !empty($_SERVER['HTTP_AUTHORIZATION']) ? sanitize_text_field($_SERVER['HTTP_AUTHORIZATION']) : false;
-		/* Double check for different auth header string (server dependent) */
-		if (!$auth_header) {
-			$auth_header = !empty($_SERVER['REDIRECT_HTTP_AUTHORIZATION']) ? sanitize_text_field($_SERVER['REDIRECT_HTTP_AUTHORIZATION']) : false;
+		$headers = getallheaders();
+
+		if (isset($headers['Authorization'])) {
+			$auth_header = $headers['Authorization'];
+		} else {
+			return false;
 		}
 
 		if (!$auth_header) {

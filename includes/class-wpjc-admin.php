@@ -133,6 +133,25 @@ class WPJC_Admin
 			__('WP Juggler', 'wp-juggler-client'),
 			__('WP Juggler', 'wp-juggler-client'),
 			$cap,
+			"wpjc-settings",
+			[$this, 'render_admin_page'],
+			"",
+			30
+		);
+
+
+		add_submenu_page(
+			'wpjc-settings',
+			__('Settings', 'wp-juggler-client'),
+			__('Settings', 'wp-juggler-client'),
+			$cap,
+			"wpjc-settings"
+		);
+
+		/* add_menu_page(
+			__('WP Juggler', 'wp-juggler-client'),
+			__('WP Juggler', 'wp-juggler-client'),
+			$cap,
 			"wpjc-dashboard",
 			[$this, 'render_admin_page'],
 			"",
@@ -146,13 +165,13 @@ class WPJC_Admin
 			__('Dashboard', 'wp-juggler-client'),
 			$cap,
 			"wpjc-dashboard"
-		);
+		); */
 	}
 
 	public function register_menu_page_end()
 	{
 
-		$cap = apply_filters('wpjc_capability', 'manage_options');
+		/* $cap = apply_filters('wpjc_capability', 'manage_options');
 
 		add_submenu_page(
 			'wpjc-dashboard',
@@ -161,7 +180,7 @@ class WPJC_Admin
 			$cap,
 			'wpjc-settings',
 			[$this, 'render_admin_page']
-		);
+		); */
 	}
 
 	public function render_user_meta($user)

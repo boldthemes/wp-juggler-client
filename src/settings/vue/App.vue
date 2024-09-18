@@ -100,7 +100,7 @@ async function saveSettings(obj) {
 
   <h1>WP Juggler Client Settings</h1>
 
-  <v-card class="pa-4 mr-4">
+  <v-card class="pa-4 mr-4" v-if="data">
 
     <table class="form-table" role="presentation">
 
@@ -139,6 +139,9 @@ async function saveSettings(obj) {
       </template>
     </v-snackbar>
 
+  </v-card>
+  <v-card class="pa-4 mr-4" v-else>
+    <v-skeleton-loader type="table-tbody" > </v-skeleton-loader>
   </v-card>
 </template>
 
