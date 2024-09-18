@@ -341,7 +341,7 @@ class WPJC_Api
 		}
 	}
 
-	public function single_plugin_info($plugin_file, $plugin_info)
+	public function single_plugin_info($plugin_file, $plugin_info, $update_plugins)
 	{
 		$data = array();
 
@@ -386,7 +386,8 @@ class WPJC_Api
 				$file_checksums[$file] = $this->plugin_checksum->return_checksum( dirname( $plugin_file ) . '/' . $file );
 			}
 
-			$data[$plugin_file]['ChecksumFiles'] = gzcompress(json_encode($file_checksums));
+			$data[$plugin_file]['ChecksumFiles'] = base64_encode(gzcompress(json_encode($file_checksums)));
+			//$data[$plugin_file]['ChecksumFiles'] = $file_checksums;
 		} else {
 			$data[$plugin_file]['ChecksumFiles'] = false;
 		}
@@ -588,7 +589,7 @@ class WPJC_Api
 			$data = [];
 
 			foreach ($installed_plugins as $plugin_path => $plugin_info) {
-				$data[] = $this->single_plugin_info($plugin_path, $plugin_info);
+				$data = array_merge($data, $this->single_plugin_info($plugin_path, $plugin_info, $update_plugins));
 			}
 
 			$plugins_data = $data;

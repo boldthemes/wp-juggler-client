@@ -235,7 +235,6 @@ class WPJCPluginChecksum {
 		if ( $this->supports_sha256() ){
 			$checksums['sha256'] = $this->get_sha256( $this->get_absolute_path( $path ) );
 		} 
-		
 		$checksums['md5'] = $this->get_md5( $this->get_absolute_path( $path ) );
 
 		return($checksums);
