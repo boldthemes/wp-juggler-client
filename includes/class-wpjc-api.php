@@ -125,6 +125,13 @@ class WPJC_Api
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
 
+		register_rest_route('juggler/v1', '/singlePlugin/', array(
+			'methods' => 'POST',
+			'callback' => array($this, 'api_single_plugin'),
+			'args' => array(),
+			'permission_callback' => array($this, 'api_validate_api_key')
+		));
+
 		register_rest_route('juggler/v1', '/deactivatePlugin/', array(
 			'methods' => 'POST',
 			'callback' => array($this, 'api_deactivate_plugin'),
@@ -334,6 +341,94 @@ class WPJC_Api
 		}
 	}
 
+	public function single_plugin_info($plugin_file, $plugin_info)
+	{
+		$data = array();
+
+		$slug = $this->get_plugin_name($plugin_file);
+
+
+		$data[$plugin_file] = $plugin_info;
+
+		$data[$plugin_file]['File'] = $plugin_file;
+		$data[$plugin_file]['Slug'] = $slug;
+
+		$data[$plugin_file]['Wporg'] = $this->is_plugin_from_wp_org($slug);
+		$data[$plugin_file]['Multisite'] = is_multisite();
+		$data[$plugin_file]['Active'] = is_plugin_active($plugin_file);
+		$data[$plugin_file]['NetworkActive'] = $this->get_status($plugin_file) == 'active-network' ? true : false;
+		$data[$plugin_file]['Update'] = false;
+		$data[$plugin_file]['UpdateVersion'] = '';
+
+		$remote = $this->plugin_plugin_updater->request();
+
+		if (!$remote || !property_exists($remote, $slug)) {
+			$data[$plugin_file]['WpJuggler'] = false;
+		} else {
+			$data[$plugin_file]['WpJuggler'] = true;
+		}
+
+		$is_tgmpa = $this->is_tgmpa_plugin_bundled($slug);
+		$data[$plugin_file]['Tgmpa'] = $is_tgmpa;
+
+		if (isset($update_plugins->response[$plugin_file])) {
+			$data[$plugin_file]['Update'] = true;
+			$data[$plugin_file]['UpdateVersion'] = $update_plugins->response[$plugin_file]->new_version;
+		}
+
+		if( $data[$plugin_file]['Wporg'] && !$data[$plugin_file]['WpJuggler'] && !$data[$plugin_file]['Tgmpa'] && $data[$plugin_file]['Slug'] !=='wp-juggler-client' ){
+
+			$plugin_files = $this->plugin_checksum->get_plugin_files($plugin_file);
+
+			$file_checksums = [];
+
+			foreach ( $plugin_files as $file ) {
+				$file_checksums[$file] = $this->plugin_checksum->return_checksum( dirname( $plugin_file ) . '/' . $file );
+			}
+
+			$data[$plugin_file]['ChecksumFiles'] = gzcompress(json_encode($file_checksums));
+		} else {
+			$data[$plugin_file]['ChecksumFiles'] = false;
+		}
+
+		return $data;
+	}
+
+	public function api_single_plugin(WP_REST_Request $request)
+	{
+		$parameters = json_decode($request->get_body(), true);
+
+		if (array_key_exists('pluginSlug', $parameters)) {
+
+			if (! function_exists('get_plugins')) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			$plugin_slug = sanitize_text_field($parameters['pluginSlug']);
+
+			$installed_plugins = get_plugins();
+			$plugin_file = '';
+
+			foreach ($installed_plugins as $plugin_path => $plugin_info) {
+				if (strpos($plugin_path, $plugin_slug . '/') === 0) {
+					$plugin_file = $plugin_path;
+					break;
+				}
+			}
+
+			if (!$plugin_file) {
+				wp_send_json_error(new WP_Error('Missing plugin', 'Plugin is not installed'), 400);
+				return;
+			}
+
+			$data = $this->single_plugin_info($plugin_file, $plugin_info);
+
+			wp_send_json_success($data, 200);
+		} else {
+			wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
+		}
+	}
+
 	public function confirm_client_api(WP_REST_Request $request)
 	{
 
@@ -488,45 +583,12 @@ class WPJC_Api
 
 			$update_plugins = get_site_transient('update_plugins');
 
-			$data_checksum = $this->plugin_checksum->get_plugin_checksum();
+			//$data_checksum = $this->plugin_checksum->get_plugin_checksum();
+
+			$data = [];
 
 			foreach ($installed_plugins as $plugin_path => $plugin_info) {
-
-				$slug = $this->get_plugin_name($plugin_path);
-
-				$data[$plugin_path] = $plugin_info;
-
-				$data[$plugin_path]['File'] = $plugin_path;
-				$data[$plugin_path]['Slug'] = $slug;
-
-				if (in_array($slug, $data_checksum['failures_list'], true)) {
-					$data[$plugin_path]['Checksum'] = false;
-				} else {
-					$data[$plugin_path]['Checksum'] = true;
-				}
-
-				$data[$plugin_path]['Wporg'] = $this->is_plugin_from_wp_org($slug);
-				$data[$plugin_path]['Multisite'] = is_multisite();
-				$data[$plugin_path]['Active'] = is_plugin_active($plugin_path);
-				$data[$plugin_path]['NetworkActive'] = $this->get_status($plugin_path) == 'active-network' ? true : false;
-				$data[$plugin_path]['Update'] = false;
-				$data[$plugin_path]['UpdateVersion'] = '';
-
-				$remote = $this->plugin_plugin_updater->request();
-
-				if (!$remote || !property_exists($remote, $slug)) {
-					$data[$plugin_path]['WpJuggler'] = false;
-				} else {
-					$data[$plugin_path]['WpJuggler'] = true;
-				}
-
-				$is_tgmpa = $this->is_tgmpa_plugin_bundled($slug);
-				$data[$plugin_path]['Tgmpa'] = $is_tgmpa;
-
-				if (isset($update_plugins->response[$plugin_path])) {
-					$data[$plugin_path]['Update'] = true;
-					$data[$plugin_path]['UpdateVersion'] = $update_plugins->response[$plugin_path]->new_version;
-				}
+				$data[] = $this->single_plugin_info($plugin_path, $plugin_info);
 			}
 
 			$plugins_data = $data;

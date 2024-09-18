@@ -201,7 +201,7 @@ class WPJCPluginChecksum {
 		return $name;
 	}
 
-	private function get_plugin_files( $path ) {
+	public function get_plugin_files( $path ) {
 		$folder = dirname( $this->get_absolute_path( $path ) );
 
 		// Return single file plugins immediately, to avoid iterating over the
@@ -228,6 +228,18 @@ class WPJCPluginChecksum {
 		$md5 = $this->get_md5( $this->get_absolute_path( $path ) );
 
 		return in_array( $md5, (array) $checksums['md5'], true );
+	}
+
+	public function return_checksum( $path ){
+		$checksums = [];
+		if ( $this->supports_sha256() ){
+			$checksums['sha256'] = $this->get_sha256( $this->get_absolute_path( $path ) );
+		} 
+		
+		$checksums['md5'] = $this->get_md5( $this->get_absolute_path( $path ) );
+
+		return($checksums);
+		
 	}
 
 	private function supports_sha256() {
