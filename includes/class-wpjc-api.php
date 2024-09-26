@@ -684,7 +684,8 @@ class WPJC_Api
 					'ThemeObject' => $theme,
 					'Update' => false,
 					'UpdateVersion' => '',
-					'Active' => false
+					'Active' => false,
+					'Slug' => $theme->get_stylesheet()
 				);
 			}, array_filter($themes, function ($theme) use ($active_theme_slug) {
 				return $theme->get_stylesheet() !== $active_theme_slug;
@@ -705,7 +706,8 @@ class WPJC_Api
 				'ThemeObject' => $active_theme,
 				'Update' => false,
 				'UpdateVersion' => '',
-				'Active' => true
+				'Active' => true,
+				'Slug' => $active_theme_slug
 			);
 
 			if (isset($updates[$active_theme_slug])) {
