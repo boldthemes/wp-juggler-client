@@ -146,6 +146,13 @@ class WPJC_Api
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
 
+		register_rest_route('juggler/v1', '/updateTheme/', array(
+			'methods' => 'POST',
+			'callback' => array($this, 'api_update_theme'),
+			'args' => array(),
+			'permission_callback' => array($this, 'api_validate_api_key')
+		));
+
 		register_rest_route('juggler/v1', '/confirmClientApi/', array(
 			'methods' => 'POST',
 			'callback' => array($this, 'confirm_client_api'),
@@ -341,6 +348,54 @@ class WPJC_Api
 		}
 	}
 
+	public function api_update_theme(WP_REST_Request $request)
+	{
+		$parameters = json_decode($request->get_body(), true);
+
+		if (array_key_exists('themeSlug', $parameters)) {
+			$theme_slug = sanitize_text_field($parameters['themeSlug']);
+
+			$theme = wp_get_theme($theme_slug);
+
+			if (!$theme->exists()) {
+				wp_send_json_error(new WP_Error('Missing theme', 'Theme is not installed'), 400);
+				return;
+			}
+
+			$is_active = $theme_slug === get_option('stylesheet');
+
+			require_once(ABSPATH . 'wp-admin/includes/class-wp-upgrader.php');
+			require_once(ABSPATH . 'wp-admin/includes/theme.php');
+
+			$api = themes_api('theme_information', array('slug' => $theme_slug));
+
+			if (is_wp_error($api)) {
+				wp_send_json_error($api, 500);
+				return;
+			}
+
+			$upgrader = new Theme_Upgrader(new Automatic_Upgrader_Skin());
+
+			try {
+				$upgrader->upgrade($theme_slug);
+
+				if ($is_active && !is_wp_error($upgrader->result)) {
+					switch_theme($theme_slug);
+				}
+
+				wp_clean_themes_cache();
+				wp_update_themes();
+			} catch (Exception $ex) {
+				wp_send_json_error(new WP_Error('upgrade_failed', __('Failed to upgrade the theme.'), array('status' => 500)), 500);
+				return;
+			}
+
+			wp_send_json_success(array(), 200);
+		} else {
+			wp_send_json_error(new WP_Error('Missing param', 'Theme slug is missing'), 400);
+		}
+	}
+
 	public function single_plugin_info($plugin_file, $plugin_info, $update_plugins)
 	{
 		$data = array();
@@ -376,14 +431,14 @@ class WPJC_Api
 			$data[$plugin_file]['UpdateVersion'] = $update_plugins->response[$plugin_file]->new_version;
 		}
 
-		if( $data[$plugin_file]['Wporg'] && !$data[$plugin_file]['WpJuggler'] && !$data[$plugin_file]['Tgmpa'] && $data[$plugin_file]['Slug'] !=='wp-juggler-client' ){
+		if ($data[$plugin_file]['Wporg'] && !$data[$plugin_file]['WpJuggler'] && !$data[$plugin_file]['Tgmpa'] && $data[$plugin_file]['Slug'] !== 'wp-juggler-client') {
 
 			$plugin_files = $this->plugin_checksum->get_plugin_files($plugin_file);
 
 			$file_checksums = [];
 
-			foreach ( $plugin_files as $file ) {
-				$file_checksums[$file] = $this->plugin_checksum->return_checksum( dirname( $plugin_file ) . '/' . $file );
+			foreach ($plugin_files as $file) {
+				$file_checksums[$file] = $this->plugin_checksum->return_checksum(dirname($plugin_file) . '/' . $file);
 			}
 
 			$data[$plugin_file]['ChecksumFiles'] = base64_encode(gzcompress(json_encode($file_checksums)));
