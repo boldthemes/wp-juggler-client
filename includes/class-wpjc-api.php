@@ -492,9 +492,30 @@ class WPJC_Api
 
 		global $wp_version;
 
+		if (! function_exists('get_core_updates')) {
+			require_once ABSPATH . 'wp-admin/includes/update.php';
+		}
+
+		delete_site_transient( 'update_core' );
+		wp_version_check();
+
+		$updates = get_core_updates();
+
+		$latest_version = false;
+
+		// Check if updates are available.
+		if ( ! empty( $updates ) && ! is_wp_error( $updates ) ) {
+			foreach ( $updates as $update ) {
+				if ( isset( $update->response ) && $update->response == 'upgrade' ) {
+					$latest_version = $update->current;
+				} 
+			}
+		} 
+
 		$data = array(
 			'multisite' => is_multisite(),
-			'wp_version' => $wp_version
+			'wp_version' => $wp_version,
+			'update_version' => $latest_version
 		);
 		wp_send_json_success($data, 200);
 	}
