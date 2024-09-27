@@ -55,10 +55,13 @@ class WPJC_Server_Api
 
 	public static function activate_site(){
 
+		global $wp_version;
+
 		$end_point = 'activateSite';
 		$data = [
 			'site_url' => get_site_url(),
-			'multisite' => is_multisite()
+			'multisite' => is_multisite(),
+			'wp_version' => $wp_version
 		];
 		
 		$response = WPJC_Server_Api::call_server_api( $end_point, $data );
