@@ -323,7 +323,7 @@ class WPJC_Api
 				$upgrader->upgrade($plugin_path);
 
 				if ($active) {
-					$result = activate_plugin($plugin_file, $network_wide);
+					$result = activate_plugin($plugin_file, '', $network_wide);
 
 					if (is_wp_error($result)) {
 						wp_send_json_error($result, 500);
