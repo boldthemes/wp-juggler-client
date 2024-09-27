@@ -78,14 +78,12 @@ class WPJC_Github_Updater
             return $response;
         }
 
-        $plugin_slug = 'wp-juggler-client/wp-juggler-client.php';
-
-        $update_info = $this->get_github_update_info();
-
-        $response = new \stdClass();
+        $plugin_slug = 'wp-juggler-client';
 
         if (!empty($args->slug) && $args->slug === $plugin_slug) {
 
+            $update_info = $this->get_github_update_info();
+            $response = new \stdClass();
 
             $response->name           = $update_info->name;
             $response->slug           = $update_info->slug;

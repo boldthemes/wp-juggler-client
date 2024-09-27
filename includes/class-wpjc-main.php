@@ -164,7 +164,6 @@ class WP_Juggler_Client {
 		$this->loader->add_filter( 'plugins_api', $plugin_github_updater, 'github_info', 20, 3 );
 		$this->loader->add_filter( 'site_transient_update_plugins', $plugin_github_updater, 'github_update');
 		$this->loader->add_filter( 'upgrader_process_complete', $plugin_github_updater, 'purge', 10, 2 );
-        //add_filter('upgrader_post_install', 'my_plugin_after_update', 10, 3 );
 
 		$this->loader->add_action( 'wp_loaded', $tgmpa_updater, '__construct' );
 

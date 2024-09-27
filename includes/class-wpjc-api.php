@@ -202,22 +202,19 @@ class WPJC_Api
 			}
 
 			$status = $this->get_status($plugin_file);
-			if (in_array($status, ['active', 'active-network'], true)) {
-				wp_send_json_error(new WP_Error('Plugin acivated', 'Deactivate plugin before activating it again'), 400);
-				return;
-			}
+			if (!in_array($status, ['active', 'active-network'], true)) {
+				try {
 
-			try {
+					$result = activate_plugin($plugin_file, '', $network_wide);
 
-				$result = activate_plugin($plugin_file, '', $network_wide);
-
-				if (is_wp_error($result)) {
-					wp_send_json_error($result, 500);
+					if (is_wp_error($result)) {
+						wp_send_json_error($result, 500);
+						return;
+					}
+				} catch (Exception $ex) {
+					wp_send_json_error(new WP_Error('activation_failed', __('Failed to activate the plugin.'), array('status' => 500)), 500);
 					return;
 				}
-			} catch (Exception $ex) {
-				wp_send_json_error(new WP_Error('activation_failed', __('Failed to activate the plugin.'), array('status' => 500)), 500);
-				return;
 			}
 
 			$data = array();
@@ -586,22 +583,22 @@ class WPJC_Api
 			if (! function_exists('get_core_updates')) {
 				require_once ABSPATH . 'wp-admin/includes/update.php';
 			}
-	
-			delete_site_transient( 'update_core' );
+
+			delete_site_transient('update_core');
 			wp_version_check();
-	
+
 			$updates = get_core_updates();
-	
+
 			$latest_version = false;
-	
+
 			// Check if updates are available.
-			if ( ! empty( $updates ) && ! is_wp_error( $updates ) ) {
-				foreach ( $updates as $update ) {
-					if ( isset( $update->response ) && $update->response == 'upgrade' ) {
+			if (! empty($updates) && ! is_wp_error($updates)) {
+				foreach ($updates as $update) {
+					if (isset($update->response) && $update->response == 'upgrade') {
 						$latest_version = $update->current;
-					} 
+					}
 				}
-			} 
+			}
 
 			$info = WP_Debug_Data::debug_data();
 			$data['debug'] = $info;
