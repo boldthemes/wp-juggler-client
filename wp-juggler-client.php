@@ -13,7 +13,7 @@
  * Plugin Name:       WP Juggler Client
  * Plugin URI:        https://wpjuggler.com
  * Description:       WP Juggler Client
- * Version:           1.0.6
+ * Version:           1.0.7
  * Author:            BoldThemes
  * Author URI:        https://wpjuggler.com
  * License:           GPL-3.0

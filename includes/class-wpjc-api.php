@@ -405,7 +405,7 @@ class WPJC_Api
 		$data[$plugin_file]['File'] = $plugin_file;
 		$data[$plugin_file]['Slug'] = $slug;
 
-		$data[$plugin_file]['Wporg'] = $this->is_plugin_from_wp_org($slug);
+		$data[$plugin_file]['Wporg'] = $this->is_plugin_hosted_on_wp_org($slug, $update_plugins);
 		$data[$plugin_file]['Multisite'] = is_multisite();
 		$data[$plugin_file]['Active'] = is_plugin_active($plugin_file);
 		$data[$plugin_file]['NetworkActive'] = $this->get_status($plugin_file) == 'active-network' ? true : false;
@@ -496,23 +496,30 @@ class WPJC_Api
 		wp_send_json_success($data, 200);
 	}
 
-	private function is_plugin_from_wp_org($plugin_slug)
-	{
-		include_once(ABSPATH . 'wp-admin/includes/plugin-install.php');
-
-		$info = plugins_api('plugin_information', array(
-			'slug'   => $plugin_slug,
-			'fields' => array(
-				'homepage' => true,
-				'banners'  => false,
-			)
-		));
-
-		if (is_wp_error($info)) {
-			return false;
+	function is_plugin_hosted_on_wp_org($plugin_slug, $update_plugins) {
+		$plugin_data = $update_plugins;
+		
+		if (isset($plugin_data->response) && is_array($plugin_data->response)) {
+			foreach ($plugin_data->response as $plugin_file => $plugin_info) {
+				if (strpos($plugin_file, $plugin_slug) !== false) {
+					if (isset($plugin_info->url) && strpos($plugin_info->url, 'wordpress.org/plugins/') !== false) {
+						return true;
+					}
+				}
+			}
 		}
 
-		return true;
+		if (isset($plugin_data->no_update) && is_array($plugin_data->no_update)) {
+			foreach ($plugin_data->no_update as $plugin_file => $plugin_info) {
+				if (strpos($plugin_file, $plugin_slug) !== false) {
+					if (isset($plugin_info->url) && strpos($plugin_info->url, 'wordpress.org/plugins/') !== false) {
+						return true;
+					}
+				}
+			}
+		}
+		
+		return false;
 	}
 
 	public function api_load_tgmpa()
