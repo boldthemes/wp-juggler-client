@@ -20,13 +20,8 @@ class WPJCCoreChecksum {
         $wp_version = '';
 		$locale     = '';
 
-        // get $wp_version
-        // get $locale
         $this->include_root = true;
         
-        //procitaj exclude files iz opcija - pitanje je samo klijenta ili servera
-        //$this->exclude_files = explode( ',', Utils\get_flag_value( $assoc_args, 'exclude', '' ) );
-
         if ( empty( $wp_version ) ) {
 			$details    = self::get_wp_details();
 			$wp_version = $details['wp_version'];
@@ -36,21 +31,14 @@ class WPJCCoreChecksum {
 			}
 		}
 
-        //za wp_get, da li ovo uopste dozvoliti
-        //$insecure   = (bool) Utils\get_flag_value( $assoc_args, 'insecure', false );
-
-        //$wp_org_api = new WPJCWpOrgApi( [ 'insecure' => $insecure ] );
-        $wp_org_api = new WPJCWpOrgApi();
-
         try {
-			//$checksums = [];
-			$checksums = $wp_org_api->get_core_checksums( $wp_version, empty( $locale ) ? 'en_US' : $locale );
+			$checksums = $this->get_core_checksum_transient($wp_version, empty( $locale ) ? 'en_US' : $locale );
 		} catch ( Exception $exception ) {
-			//WP_CLI::error( $exception );
+			return false;
 		}
 
         if ( ! is_array( $checksums ) ) {
-			//WP_CLI::error( "Couldn't get checksums from WordPress.org." );
+			return false;
 		}
 
         $has_errors = false;
@@ -88,13 +76,12 @@ class WPJCCoreChecksum {
 				if ( in_array( $additional_file, $this->exclude_files, true ) ) {
 					continue;
 				}
-				//WP_CLI::warning( "File should not exist: {$additional_file}" );
 			}
 		}
 
         return [
             'errors' => $has_errors,
-            'additional' => $values = array_values((array) $additional_files),
+            'additional' => array_values((array) $additional_files),
 			'error_files' => $error_files
         ];
 
@@ -107,6 +94,32 @@ class WPJCCoreChecksum {
 		}
 
     }
+
+	private function get_core_checksum_transient($wp_version, $locale)
+	{
+		$cache_key = 'checksum_core/' . $wp_version . '/' . $locale;
+
+		$checksum = get_transient($cache_key);
+
+		if ( false === $checksum || '' == $checksum ) {
+
+			$wp_org_api = new WPJCWpOrgApi();
+
+			try {
+				$checksum = $wp_org_api->get_core_checksums( $wp_version, $locale );
+				set_transient($cache_key, $checksum, 5 * DAY_IN_SECONDS);
+
+			} catch (Exception $exception) {
+				$checksum = false;
+			}
+		}
+
+		if($checksum == ''){
+			$checksum = false;
+		}
+
+		return $checksum;
+	}
 
     protected function get_files( $path ) {
 		$filtered_files = array();

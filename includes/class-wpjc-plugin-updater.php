@@ -65,7 +65,7 @@ public function request(){
 				return false;
 			}
 
-			set_transient( $this->cache_key, $remote, HOUR_IN_SECONDS );
+			set_transient( $this->cache_key, $remote, 7 * HOUR_IN_SECONDS );
 		}
 
 	}
@@ -142,13 +142,13 @@ public function update( $transient ) {
 
 	$remote = $this->request();
 
-	if ( ! function_exists( 'get_plugins' ) ) {
-        require_once ABSPATH . 'wp-admin/includes/plugin.php';
-    }
-
 	if(! $remote ){
 		return $transient;
 	}
+
+	if ( ! function_exists( 'get_plugins' ) ) {
+        require_once ABSPATH . 'wp-admin/includes/plugin.php';
+    }
 
 	$all_plugins = get_plugins();
     

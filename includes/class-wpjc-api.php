@@ -331,8 +331,9 @@ class WPJC_Api
 					}
 				}
 
-				WPJC_Plugin_Updater::clear_wpjs_plugin_cache();
+				$this->plugin_plugin_updater->delete_transient();
 				wp_update_plugins();
+
 			} catch (Exception $ex) {
 				wp_send_json_error(new WP_Error('upgrade_failed', __('Failed to upgrade the plugin.'), array('status' => 500)), 500);
 				return;
@@ -393,12 +394,44 @@ class WPJC_Api
 		}
 	}
 
+	public function single_plugin_checksum_info($plugin_file, $plugin_info, $update_plugins)
+	{
+		$ret_data = false;
+
+		$slug = $this->get_plugin_name($plugin_file);
+		$wporg = $this->is_plugin_hosted_on_wp_org($slug, $update_plugins);
+
+		$remote = $this->plugin_plugin_updater->request();
+
+		if (!$remote || !property_exists($remote, $slug)) {
+			$wp_juggler = false;
+		} else {
+			$wp_juggler = true;
+		}
+
+		$tgmpa = $this->is_tgmpa_plugin_bundled($slug);
+
+		if ($wporg && !$wp_juggler && !$tgmpa && $slug !== 'wp-juggler-client') {
+
+			$plugin_files = $this->plugin_checksum->get_plugin_files($plugin_file);
+
+			$file_checksums = [];
+
+			foreach ($plugin_files as $file) {
+				$file_checksums[$file] = $this->plugin_checksum->return_checksum(dirname($plugin_file) . '/' . $file);
+			}
+
+			$ret_data = base64_encode(gzcompress(json_encode($file_checksums)));
+		} 
+
+		return $ret_data;
+	}
+
 	public function single_plugin_info($plugin_file, $plugin_info, $update_plugins)
 	{
 		$data = array();
 
 		$slug = $this->get_plugin_name($plugin_file);
-
 
 		$data[$plugin_file] = $plugin_info;
 
@@ -428,21 +461,7 @@ class WPJC_Api
 			$data[$plugin_file]['UpdateVersion'] = $update_plugins->response[$plugin_file]->new_version;
 		}
 
-		if ($data[$plugin_file]['Wporg'] && !$data[$plugin_file]['WpJuggler'] && !$data[$plugin_file]['Tgmpa'] && $data[$plugin_file]['Slug'] !== 'wp-juggler-client') {
-
-			$plugin_files = $this->plugin_checksum->get_plugin_files($plugin_file);
-
-			$file_checksums = [];
-
-			foreach ($plugin_files as $file) {
-				$file_checksums[$file] = $this->plugin_checksum->return_checksum(dirname($plugin_file) . '/' . $file);
-			}
-
-			$data[$plugin_file]['ChecksumFiles'] = base64_encode(gzcompress(json_encode($file_checksums)));
-			//$data[$plugin_file]['ChecksumFiles'] = $file_checksums;
-		} else {
-			$data[$plugin_file]['ChecksumFiles'] = false;
-		}
+		//$data[$plugin_file]['ChecksumFiles'] = $this->single_plugin_checksum_info($plugin_file, $plugin_info, $update_plugins);
 
 		return $data;
 	}
@@ -562,54 +581,48 @@ class WPJC_Api
 		$task_id = sanitize_text_field($parameters['taskId']);
 		$task_type = sanitize_text_field($parameters['taskType']);
 
+
 		if ($task_type == 'checkCoreChecksum') {
-			$data = $this->core_checksum->get_core_checksum();
+			$data = array();
+			$data['core_checksum'] = $this->core_checksum->get_core_checksum();
 		}
 
-		if ($task_type == 'checkPluginChecksum') {
-			$data = $this->plugin_checksum->get_plugin_checksum();
-		}
-
-		if ($task_type == 'checkHealth') {
-
+		if ($task_type == 'checkDebug') {
 			global $wp_version;
-
-			$health_check_site_status = new WPJC_Health();
 
 			require_once ABSPATH . 'wp-admin/includes/admin.php';
 
 			if (! class_exists('WP_Debug_Data')) {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-debug-data.php';
 			}
+			
+			WP_Debug_Data::check_for_updates();
+
+			$data = array();
+
+			$info = WP_Debug_Data::debug_data();
+			$data['debug'] = $info;
+		}
+
+		if ($task_type == 'checkHealth') {
+
+			global $wp_version;
+
+			if (! class_exists('WP_Debug_Data')) {
+				require_once ABSPATH . 'wp-admin/includes/class-wp-debug-data.php';
+			}
+
+			$health_check_site_status = new WPJC_Health();
+
+			require_once ABSPATH . 'wp-admin/includes/admin.php';
 
 			WP_Debug_Data::check_for_updates();
 			$data = $health_check_site_status->wpjc_health_info();
-
-			// Check for updates of core
-
-			if (! function_exists('get_core_updates')) {
-				require_once ABSPATH . 'wp-admin/includes/update.php';
-			}
-
-			delete_site_transient('update_core');
-			wp_version_check();
 
 			$updates = get_core_updates();
 
 			$latest_version = false;
 
-			// Check if updates are available.
-			if (! empty($updates) && ! is_wp_error($updates)) {
-				foreach ($updates as $update) {
-					if (isset($update->response) && $update->response == 'upgrade') {
-						$latest_version = $update->current;
-					}
-				}
-			}
-
-			$info = WP_Debug_Data::debug_data();
-			$data['debug'] = $info;
-			$data['core_checksum'] = $this->core_checksum->get_core_checksum();
 			$data['update_version'] = $latest_version;
 			$data['wp_version'] = $wp_version;
 		}
@@ -663,8 +676,6 @@ class WPJC_Api
 
 			$this->plugin_plugin_updater->delete_transient();
 			$this->plugin_github_updater->delete_transient();
-
-			WPJC_Plugin_Updater::clear_wpjs_plugin_cache();
 
 			wp_update_plugins();
 
@@ -753,6 +764,21 @@ class WPJC_Api
 				'plugins_data' => $plugins_data,
 				'themes_data' => $themes_data,
 			);
+		}
+
+		if ($task_type == 'checkPluginChecksum') {
+
+			$installed_plugins = get_plugins();
+
+			wp_update_plugins();
+
+			$update_plugins = get_site_transient('update_plugins');
+
+			$data = array();
+
+			foreach ($installed_plugins as $plugin_path => $plugin_info) {
+				$data[$plugin_path]['ChecksumFiles'] = $this->single_plugin_checksum_info($plugin_path, $plugin_info, $update_plugins);
+			}
 		}
 
 		if ($task_type == 'checkThemes') {
