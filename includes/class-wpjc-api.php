@@ -778,7 +778,7 @@ class WPJC_Api
 
 			foreach ($installed_plugins as $plugin_path => $plugin_info) {
 				$data[$plugin_path]['ChecksumFiles'] = $this->single_plugin_checksum_info($plugin_path, $plugin_info, $update_plugins);
-				$data[$plugin_path]['Version'] = $plugin_info['Version'];
+				$data[$plugin_path]['ChecksumVersion'] = $plugin_info['Version'];
 			}
 		}
 
