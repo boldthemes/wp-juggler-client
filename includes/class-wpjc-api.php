@@ -217,7 +217,39 @@ class WPJC_Api
 				}
 			}
 
-			$data = array();
+			if (! function_exists('get_plugins')) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			if (! function_exists('wp_update_plugins')) {
+				require_once ABSPATH . 'wp-includes/update.php';
+			}
+
+			$installed_plugins = get_plugins();
+
+			// $this->plugin_plugin_updater->delete_transient();
+			// $this->plugin_github_updater->delete_transient();
+
+			wp_update_plugins();
+
+			$update_plugins = get_site_transient('update_plugins');
+
+			$data = [];
+
+			foreach ($installed_plugins as $plugin_path => $plugin_info) {
+				$slug = $this->get_plugin_name($plugin_path);
+				if ($slug == $plugin_slug) {
+					$data = $this->single_plugin_info($plugin_path, $plugin_info, $update_plugins);
+					break;
+				}
+			}
+
+			$plugins_data = $data;
+
+			$data = array(
+				'plugins_data' => $plugins_data,
+			);
+
 			wp_send_json_success($data, 200);
 		} else {
 			wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
@@ -263,7 +295,40 @@ class WPJC_Api
 					return;
 				}
 			}
-			$data = array();
+
+			if (! function_exists('get_plugins')) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			if (! function_exists('wp_update_plugins')) {
+				require_once ABSPATH . 'wp-includes/update.php';
+			}
+
+			$installed_plugins = get_plugins();
+
+			//$this->plugin_plugin_updater->delete_transient();
+			//$this->plugin_github_updater->delete_transient();
+
+			wp_update_plugins();
+
+			$update_plugins = get_site_transient('update_plugins');
+
+			$data = [];
+
+			foreach ($installed_plugins as $plugin_path => $plugin_info) {
+				$slug = $this->get_plugin_name($plugin_path);
+				if ($slug == $plugin_slug) {
+					$data = $this->single_plugin_info($plugin_path, $plugin_info, $update_plugins);
+					break;
+				}
+			}
+
+			$plugins_data = $data;
+
+			$data = array(
+				'plugins_data' => $plugins_data,
+			);
+
 			wp_send_json_success($data, 200);
 		} else {
 			wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
@@ -333,13 +398,45 @@ class WPJC_Api
 
 				$this->plugin_plugin_updater->delete_transient();
 				wp_update_plugins();
-
 			} catch (Exception $ex) {
 				wp_send_json_error(new WP_Error('upgrade_failed', __('Failed to upgrade the plugin.'), array('status' => 500)), 500);
 				return;
 			}
 
-			$data = array();
+			if (! function_exists('get_plugins')) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			if (! function_exists('wp_update_plugins')) {
+				require_once ABSPATH . 'wp-includes/update.php';
+			}
+
+			$installed_plugins = get_plugins();
+
+			// $this->plugin_plugin_updater->delete_transient();
+			// $this->plugin_github_updater->delete_transient();
+
+			wp_update_plugins();
+
+			$update_plugins = get_site_transient('update_plugins');
+
+			$data = [];
+
+			foreach ($installed_plugins as $plugin_path => $plugin_info) {
+				$slug = $this->get_plugin_name($plugin_path);
+				if ($slug == $plugin_slug) {
+					$data = $this->single_plugin_info($plugin_path, $plugin_info, $update_plugins);
+					$data[$plugin_path]['ChecksumFiles'] = $this->single_plugin_checksum_info($plugin_path, $plugin_info, $update_plugins);
+					break;
+				}
+			}
+
+			$plugins_data = $data;
+
+			$data = array(
+				'plugins_data' => $plugins_data,
+			);
+
 			wp_send_json_success($data, 200);
 		} else {
 			wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
@@ -422,7 +519,7 @@ class WPJC_Api
 			}
 
 			$ret_data = base64_encode(gzcompress(json_encode($file_checksums)));
-		} 
+		}
 
 		return $ret_data;
 	}
@@ -515,9 +612,10 @@ class WPJC_Api
 		wp_send_json_success($data, 200);
 	}
 
-	function is_plugin_hosted_on_wp_org($plugin_slug, $update_plugins) {
+	function is_plugin_hosted_on_wp_org($plugin_slug, $update_plugins)
+	{
 		$plugin_data = $update_plugins;
-		
+
 		if (isset($plugin_data->response) && is_array($plugin_data->response)) {
 			foreach ($plugin_data->response as $plugin_file => $plugin_info) {
 				if (strpos($plugin_file, $plugin_slug) !== false) {
@@ -537,7 +635,7 @@ class WPJC_Api
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -595,7 +693,7 @@ class WPJC_Api
 			if (! class_exists('WP_Debug_Data')) {
 				require_once ABSPATH . 'wp-admin/includes/class-wp-debug-data.php';
 			}
-			
+
 			WP_Debug_Data::check_for_updates();
 
 			$data = array();
