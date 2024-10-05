@@ -449,21 +449,21 @@ class WPJC_Api
 		$parameters = json_decode($request->get_body(), true);
 
 		if (array_key_exists('themeSlug', $parameters)) {
-			$theme_slug = sanitize_text_field($parameters['themeSlug']);
+			$theme_slug_init = sanitize_text_field($parameters['themeSlug']);
 
-			$theme = wp_get_theme($theme_slug);
+			$theme = wp_get_theme($theme_slug_init);
 
 			if (!$theme->exists()) {
 				wp_send_json_error(new WP_Error('Missing theme', 'Theme is not installed'), 400);
 				return;
 			}
 
-			$is_active = $theme_slug === get_option('stylesheet');
+			$is_active = $theme_slug_init === get_option('stylesheet');
 
 			require_once(ABSPATH . 'wp-admin/includes/class-wp-upgrader.php');
 			require_once(ABSPATH . 'wp-admin/includes/theme.php');
 
-			$api = themes_api('theme_information', array('slug' => $theme_slug));
+			$api = themes_api('theme_information', array('slug' => $theme_slug_init));
 
 			if (is_wp_error($api)) {
 				wp_send_json_error($api, 500);
@@ -473,20 +473,88 @@ class WPJC_Api
 			$upgrader = new Theme_Upgrader(new Automatic_Upgrader_Skin());
 
 			try {
-				$upgrader->upgrade($theme_slug);
+				$upgrader->upgrade($theme_slug_init);
 
 				if ($is_active && !is_wp_error($upgrader->result)) {
-					switch_theme($theme_slug);
+					switch_theme($theme_slug_init);
 				}
 
-				wp_clean_themes_cache();
-				wp_update_themes();
 			} catch (Exception $ex) {
 				wp_send_json_error(new WP_Error('upgrade_failed', __('Failed to upgrade the theme.'), array('status' => 500)), 500);
 				return;
 			}
 
-			wp_send_json_success(array(), 200);
+			if (! function_exists('wp_get_theme')) {
+				require_once ABSPATH . 'wp-includes/theme.php';
+			}
+
+			if (! function_exists('wp_update_themes')) {
+				require_once ABSPATH . 'wp-includes/update.php';
+			}
+
+			if (! function_exists('get_theme_updates')) {
+				require_once ABSPATH . 'wp-admin/includes/update.php';
+			}
+
+			//wp_clean_themes_cache();
+			wp_update_themes();
+
+			$themes = wp_get_themes();
+			$active_theme = wp_get_theme();
+			$active_theme_slug = $active_theme->get_stylesheet();
+
+			$updates = get_theme_updates();
+
+			$themes_info = array_map(function ($theme) {
+				return array(
+					'Name' => $theme->get('Name'),
+					'Version' => $theme->get('Version'),
+					'Author' => $theme->get('Author'),
+					'IsChildTheme' => $theme->parent() ? true : false,
+					'ThemeObject' => $theme,
+					'Update' => false,
+					'UpdateVersion' => '',
+					'Active' => false,
+					'Slug' => $theme->get_stylesheet()
+				);
+			}, array_filter($themes, function ($theme) use ($active_theme_slug) {
+				return $theme->get_stylesheet() !== $active_theme_slug;
+			}));
+
+			foreach ($themes_info as $theme_slug => $theme) {
+				if (isset($updates[$theme_slug])) {
+					$themes_info[$theme_slug]['Update'] = true;
+					$themes_info[$theme_slug]['UpdateVersion'] = $updates[$theme_slug]->update['new_version'];
+				}
+			}
+
+			$active_theme_info = array(
+				'Name' => $active_theme->get('Name'),
+				'Version' => $active_theme->get('Version'),
+				'Author' => $active_theme->get('Author'),
+				'IsChildTheme' => $active_theme->parent() ? true : false,
+				'ThemeObject' => $active_theme,
+				'Update' => false,
+				'UpdateVersion' => '',
+				'Active' => true,
+				'Slug' => $active_theme_slug
+			);
+
+			if (isset($updates[$active_theme_slug])) {
+				$active_theme_info['Update'] = true;
+				$active_theme_info['UpdateVersion'] = $updates[$active_theme_slug]->update['new_version'];
+			}
+
+			$themes_data = $themes_info;
+			$themes_data[$active_theme_slug] = $active_theme_info;
+
+			$final_themes_data[$theme_slug_init] = $themes_data[$theme_slug_init];
+
+			$data = array(
+				'themes_data' => $final_themes_data,
+			);
+
+			wp_send_json_success($data, 200);
 		} else {
 			wp_send_json_error(new WP_Error('Missing param', 'Theme slug is missing'), 400);
 		}
