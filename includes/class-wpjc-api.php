@@ -427,6 +427,7 @@ class WPJC_Api
 				if ($slug == $plugin_slug) {
 					$data = $this->single_plugin_info($plugin_path, $plugin_info, $update_plugins);
 					$data[$plugin_path]['ChecksumFiles'] = $this->single_plugin_checksum_info($plugin_path, $plugin_info, $update_plugins);
+					$data[$plugin_path]['ChecksumVersion'] = $plugin_info['Version'];
 					break;
 				}
 			}
