@@ -1029,6 +1029,10 @@ class WPJC_Api
 			$name = dirname($basename);
 		}
 
+		if ('hello' === $name) {
+			$name = 'hello-dolly';
+		}
+
 		return $name;
 	}
 
