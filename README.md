@@ -56,3 +56,7 @@ You can setup your WP Juggler Network in three simple steps:
 3. On your client site, edit the User's profile and check **Enable auto login for this user**. 
 4. We are all set. You can test the login by first logging out of the client site's wp-admin.  
 4. Lastly, go to your control panel and click **wp-admin** button in your site's row. You should be automatically logged in as chosen user.
+
+## ToDo List ##
+
+If you have a feature proposal or and idea on how to make WP Juggler better and more useful, please use [Issues section](https://github.com/boldthemes/wp-juggler-server/issues). We will be glad to review them and add them to [the list](https://github.com/boldthemes/wp-juggler-server/?tab=readme-ov-file#todo-list).
