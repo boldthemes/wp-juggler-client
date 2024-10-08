@@ -1,7 +1,7 @@
 # WP Juggler Client #
 
 > [!IMPORTANT]
-> This repository hosts WP Juggler Client plugin. For WP Juggler Getting Started Guide or WP Juggler Server plugin, visit this repository: [WP Juggler Server plugin](https://github.com/boldthemes/wp-juggler-server)
+> This repository hosts WP Juggler Client plugin. For WP Juggler [Getting Started Guide](https://github.com/boldthemes/wp-juggler-server/?tab=readme-ov-file#getting-started-guide) or WP Juggler Server plugin, visit this repository: [WP Juggler Server plugin](https://github.com/boldthemes/wp-juggler-server)
 
 WP Juggler is your ultimate solution for effectively managing an unlimited portfolio of WordPress sites from a single, intuitive dashboard. 
 
