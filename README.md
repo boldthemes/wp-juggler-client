@@ -42,7 +42,7 @@ You can setup your WP Juggler Network in three simple steps:
 1. Navigate to **WP Juggler** screen in your client site's wp-admin and enter bith API Key and server's url
 2. Click **Save Settings**. You will should see the message that your site is successfully activated 
 
-![Screenshot of WP Juggler Site Edit Screen](https://bold-themes.com/wp-content/wp-juggler-assets/wp-juggler-site-edit.png)
+![Screenshot of WP Juggler Site Edit Screen](https://bold-themes.com/wp-content/wp-juggler-assets/wp-juggler-client.png)
 
 ### Fetch your first data ###
 1. Navigate to  **WP Juggler > Control Panel** in your server's wp-admin and your newly activated site should appear in the list.
@@ -59,4 +59,4 @@ You can setup your WP Juggler Network in three simple steps:
 
 ## ToDo List ##
 
-If you have a feature proposal or and idea on how to make WP Juggler better and more useful, please use [Issues section](https://github.com/boldthemes/wp-juggler-server/issues). We will be glad to review them and add them to [the list](https://github.com/boldthemes/wp-juggler-server/?tab=readme-ov-file#todo-list).
+If you have a feature proposal or an idea on how to make WP Juggler better and more useful, please use [Issues section](https://github.com/boldthemes/wp-juggler-server/issues). We will be glad to review them and add them to [the list](https://github.com/boldthemes/wp-juggler-server/?tab=readme-ov-file#todo-list).
