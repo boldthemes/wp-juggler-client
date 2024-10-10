@@ -89,7 +89,7 @@ class WPJC_AJAX
 
 		$data = array(
 			'wpjc_api_key' => $wpjc_api_key ? esc_attr($wpjc_api_key) : '',
-			'wpjc_server_url' => $wpjc_server_url ? esc_attr($wpjc_server_url) : '',
+			'wpjc_server_url' => $wpjc_server_url ? esc_attr($wpjc_server_url) : ''
 		);
 
 		wp_send_json_success($data, 200);

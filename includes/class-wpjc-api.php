@@ -166,6 +166,14 @@ class WPJC_Api
 			'args' => array(),
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
+
+		register_rest_route('juggler/v1', '/checkHeaders/', array(
+			'methods' => 'POST',
+			'callback' => array($this, 'check_headers'),
+			'args' => array(),
+			//'permission_callback' => '__return_false'
+			'permission_callback' => array($this, 'api_validate_api_key')
+		));
 	}
 
 	public function api_activate_plugin(WP_REST_Request $request)
@@ -677,6 +685,14 @@ class WPJC_Api
 		$data = array(
 			'multisite' => is_multisite(),
 			'wp_version' => $wp_version
+		);
+		wp_send_json_success($data, 200);
+	}
+
+	public function check_headers(WP_REST_Request $request)
+	{
+		$data = array(
+			'headers_passed' => true
 		);
 		wp_send_json_success($data, 200);
 	}

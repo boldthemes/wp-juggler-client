@@ -142,10 +142,10 @@
       this[globalName] = mainExports;
     }
   }
-})({"19XKN":[function(require,module,exports) {
+})({"eebDC":[function(require,module,exports) {
 var global = arguments[3];
 var HMR_HOST = null;
-var HMR_PORT = 64089;
+var HMR_PORT = 1234;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "916932b22e4085ab";
 var HMR_USE_SSE = false;
@@ -47342,6 +47342,6 @@ function findComponentParent(vnode, root) {
     return root;
 }
 
-},{"vue":"gCTam","../util/index.mjs":"ivUh8","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"4aEO8":[function() {},{}],"6KE1a":[function() {},{}]},["19XKN","cRoO0"], "cRoO0", "parcelRequire94c2")
+},{"vue":"gCTam","../util/index.mjs":"ivUh8","@parcel/transformer-js/src/esmodule-helpers.js":"5oERU"}],"4aEO8":[function() {},{}],"6KE1a":[function() {},{}]},["eebDC","cRoO0"], "cRoO0", "parcelRequire94c2")
 
 //# sourceMappingURL=wpjc-dashboard.js.map

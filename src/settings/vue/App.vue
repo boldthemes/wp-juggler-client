@@ -1,7 +1,7 @@
 <script setup>
 
 import { useWpjcStore } from './store.js'
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { useQueryClient, useQuery, useMutation } from '@tanstack/vue-query'
 
 const queryClient = useQueryClient()
@@ -13,6 +13,7 @@ const nonce = ref(wpjc_settings_object.nonce)
 const wpjc_api_key = ref('')
 const wpjc_server_url = ref('')
 const save_loading = ref(false)
+const wpjc_authorization = ref('Checking...');
 
 const snackbar = ref(false)
 const snackbar_color = ref('success')
@@ -54,11 +55,35 @@ async function doAjax(args) {
     result = await jQuery.ajax({
       url: wpjc_settings_object.ajaxurl,
       type: 'POST',
-      data: args
+      data: args,
     });
     return result;
   } catch (error) {
     throw (error)
+  }
+}
+
+async function checkHeaders(url, api_key) {
+
+  let result;
+  try {
+    result = await jQuery.ajax({
+      url: url,
+      type: 'POST',
+      data: [],
+      beforeSend: function (xhr) {
+        xhr.setRequestHeader('Authorization', 'Bearer ' + api_key);
+      }
+    })
+
+    if (result.data.headers_passed) {
+      wpjc_authorization.value = 'Passed'
+    } else {
+      wpjc_authorization.value = 'Failed'
+    }
+
+  } catch (error) {
+    wpjc_authorization.value = 'Failed'
   }
 }
 
@@ -78,6 +103,7 @@ async function getSettings() {
   return ret
 }
 
+
 function clickSaveSettings() {
   save_loading.value = true
   mutation.mutate({
@@ -93,6 +119,12 @@ async function saveSettings(obj) {
 
   const response = await doAjax(obj)
 }
+
+watch(data, async (newData, oldData) => {
+  wpjc_authorization.value = 'Checking...'
+  await (checkHeaders(wpjc_settings_object.resturl + 'juggler/v1/checkHeaders', wpjc_api_key.value))
+})
+
 
 </script>
 
@@ -115,6 +147,17 @@ async function saveSettings(obj) {
           <th scope="row"><label for="server url">WP Server Url</label></th>
           <td>
             <input type="text" size="50" placeholder="" v-model="wpjc_server_url">
+          </td>
+        </tr>
+
+        <tr>
+          <th scope="row"><label for="server url">Auth Header Test</label></th>
+          <td>
+            {{ wpjc_authorization }}
+            <v-icon color="success" icon="mdi-check-bold" size="large" class="mr-1"
+              v-if="wpjc_authorization == 'Passed'"></v-icon>
+            <v-icon color="error" icon="mdi-alert-outline" size="large" class="mr-1"
+              v-if="wpjc_authorization == 'Failed'"></v-icon>
           </td>
         </tr>
 
@@ -141,7 +184,7 @@ async function saveSettings(obj) {
 
   </v-card>
   <v-card class="pa-4 mr-4" v-else>
-    <v-skeleton-loader type="table-tbody" > </v-skeleton-loader>
+    <v-skeleton-loader type="table-tbody"> </v-skeleton-loader>
   </v-card>
 </template>
 

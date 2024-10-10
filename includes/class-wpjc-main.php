@@ -146,7 +146,6 @@ class WP_Juggler_Client {
 		$this->loader->add_action( 'wp_ajax_wpjc_get_settings', $plugin_ajax, 'ajax_get_settings' );
 		$this->loader->add_action( 'wp_ajax_wpjc_save_settings', $plugin_ajax, 'ajax_save_settings' );
 
-
 		$this->loader->add_action( 'template_redirect', $plugin_service, 'wpjc_check_token' );
 
 		$this->loader->add_action( 'rest_api_init', $plugin_api, 'api_register_routes' );

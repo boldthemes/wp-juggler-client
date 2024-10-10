@@ -86,6 +86,7 @@ class WPJC_Admin
 				$this->plugin_name . '_dashboard_object',
 				array(
 					'ajaxurl' => admin_url('admin-ajax.php'),
+					'resturl' => rest_url(),
 					'nonce' => $nonce,
 					'adminurl' => admin_url(),
 				)
@@ -117,6 +118,7 @@ class WPJC_Admin
 				$this->plugin_name . '_settings_object',
 				array(
 					'ajaxurl' => admin_url('admin-ajax.php'),
+					'resturl' => rest_url(),
 					'nonce' => $nonce,
 					'adminurl' => admin_url(),
 				)
@@ -217,4 +219,5 @@ class WPJC_Admin
 		<div id="app"></div>
 <?php
 	}
+
 }
