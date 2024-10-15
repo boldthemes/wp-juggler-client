@@ -491,7 +491,7 @@ class WPJC_Api
 
 			try {
 
-				$result = $upgrader->install($temp_file);
+				$result = $upgrader->install( $temp_file );
 				wp_update_plugins();
 
 			} catch (Exception $ex) {
