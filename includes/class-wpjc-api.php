@@ -146,6 +146,13 @@ class WPJC_Api
 			'permission_callback' => array($this, 'api_validate_api_key')
 		));
 
+		register_rest_route('juggler/v1', '/installPlugin/', array(
+			'methods' => 'POST',
+			'callback' => array($this, 'api_install_plugin'),
+			'args' => array(),
+			'permission_callback' => array($this, 'api_validate_api_key')
+		));
+
 		register_rest_route('juggler/v1', '/updateTheme/', array(
 			'methods' => 'POST',
 			'callback' => array($this, 'api_update_theme'),
@@ -433,6 +440,86 @@ class WPJC_Api
 			foreach ($installed_plugins as $plugin_path => $plugin_info) {
 				$slug = $this->get_plugin_name($plugin_path);
 				if ($slug == $plugin_slug) {
+					$data = $this->single_plugin_info($plugin_path, $plugin_info, $update_plugins);
+					$data[$plugin_path]['ChecksumFiles'] = $this->single_plugin_checksum_info($plugin_path, $plugin_info, $update_plugins);
+					$data[$plugin_path]['ChecksumVersion'] = $plugin_info['Version'];
+					break;
+				}
+			}
+
+			$plugins_data = $data;
+
+			$data = array(
+				'plugins_data' => $plugins_data,
+			);
+
+			wp_send_json_success($data, 200);
+		} else {
+			wp_send_json_error(new WP_Error('Missing param', 'Plugin slug is missing'), 400);
+		}
+	}
+
+	public function api_install_plugin(WP_REST_Request $request)
+	{
+		$parameters = json_decode($request->get_body(), true);
+
+		if (array_key_exists('pluginUrl', $parameters)) {
+
+			
+
+			$plugin_url = sanitize_text_field($parameters['pluginUrl']);
+
+			include_once ABSPATH . 'wp-admin/includes/file.php';
+			include_once ABSPATH . 'wp-admin/includes/misc.php';
+			include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+			include_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+			include_once ABSPATH . 'wp-admin/includes/plugin.php';
+			require_once ABSPATH . 'wp-includes/update.php';
+		
+			$temp_file = download_url($plugin_url);
+		
+			if (is_wp_error($temp_file)) {
+				wp_send_json_error(new WP_Error('install_failed', __('Failed to install the plugin.'), array('status' => 500)), 500);
+				return;
+			}
+
+			$installed_plugins_before = get_plugins();
+    		$plugin_slugs_before = array_keys($installed_plugins_before);
+		
+			$upgrader = new Plugin_Upgrader();
+			$upgrader->skin = new WPJS_Upgrader_Skin();
+
+			try {
+
+				$result = $upgrader->install($temp_file);
+				wp_update_plugins();
+
+			} catch (Exception $ex) {
+				wp_send_json_error(new WP_Error('install_failed', __('Failed to install the plugin.'), array('status' => 500)), 500);
+				return;
+			}
+		
+			@unlink($temp_file);
+
+			if (is_wp_error($result) || !$result) {
+				wp_send_json_error(new WP_Error('install_failed', __('Failed to install the plugin.'), array('status' => 500)), 500);
+				return;
+			}
+
+			$installed_plugins_after = get_plugins();
+			$plugin_slugs_after = array_keys($installed_plugins_after);
+
+			$new_plugin_slugs = array_diff($plugin_slugs_after, $plugin_slugs_before);
+
+			$new_plugin_slug = dirname(reset($new_plugin_slugs));
+
+			$update_plugins = get_site_transient('update_plugins');
+
+			$data = [];
+
+			foreach ($installed_plugins_after as $plugin_path => $plugin_info) {
+				$slug = $this->get_plugin_name($plugin_path);
+				if ($slug == $new_plugin_slug) {
 					$data = $this->single_plugin_info($plugin_path, $plugin_info, $update_plugins);
 					$data[$plugin_path]['ChecksumFiles'] = $this->single_plugin_checksum_info($plugin_path, $plugin_info, $update_plugins);
 					$data[$plugin_path]['ChecksumVersion'] = $plugin_info['Version'];
@@ -1072,3 +1159,21 @@ class WPJC_Api
 		return $required === $this->get_status($file);
 	}
 }
+
+
+class WPJS_Upgrader_Skin extends WP_Upgrader_Skin {
+	public function feedback( $feedback, ...$args ) {
+		return;
+	}
+
+	public function header() {
+		return;
+	}
+
+	public function footer() {
+		return;
+	}
+}
+
+
+
