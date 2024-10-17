@@ -158,6 +158,7 @@ watch(data, async (newData, oldData) => {
               v-if="wpjc_authorization == 'Passed'"></v-icon>
             <v-icon color="error" icon="mdi-alert-outline" size="large" class="mr-1"
               v-if="wpjc_authorization == 'Failed'"></v-icon>
+            <div v-if="wpjc_authorization == 'Failed'">You need to enable PHP HTTP Authorization Header. <br>Please refer to plugin documentation for more information</div>
           </td>
         </tr>
 
