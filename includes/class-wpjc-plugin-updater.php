@@ -209,11 +209,12 @@ public function bypass_verification_for_updater( $args, $url ) {
 
 	$wpjc_server_url = get_site_option('wpjc_server_url');
 
-	if ( strpos($url, untrailingslashit($wpjc_server_url)) !==false  ){
-		$args['reject_unsafe_urls'] = false;
-		$args['sslverify'] = false;
+	if($wpjc_server_url && $wpjc_server_url!== ''){
+		if ( strpos($url, untrailingslashit($wpjc_server_url)) !==false  ){
+			$args['reject_unsafe_urls'] = false;
+			$args['sslverify'] = false;
+		}
 	}
-
     return $args;
 }
 
